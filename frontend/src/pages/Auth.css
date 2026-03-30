@@ -1,0 +1,170 @@
+/* Auth.css - Modern Glassmorphic Auth Pages */
+
+.modern-auth-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: 
+    radial-gradient(circle at 15% 30%, #f0f5ff 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, #ebf2ff 0%, transparent 40%),
+    linear-gradient(135deg, #f7f9fd 0%, #e6effc 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.modern-auth-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.modern-auth-bg-layer {
+  position: absolute;
+  top: 4px; /* Offset behind the card */
+  left: 36px;
+  right: 36px;
+  height: 60px;
+  background: linear-gradient(90deg, #4da3ff, #6290e8);
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+  box-shadow: 0 -4px 15px rgba(77, 163, 255, 0.4);
+}
+
+.modern-auth-card {
+  position: relative;
+  background: #ffffff;
+  padding: 40px 35px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(90, 144, 227, 0.12),
+              0 2px 10px rgba(90, 144, 227, 0.05);
+  z-index: 2;
+  border-top: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.modern-auth-card h2 {
+  text-align: center;
+  color: #4a75cc; /* Matching the blue in the image */
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 30px;
+  letter-spacing: -0.01em;
+}
+
+.modern-form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.modern-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #556784;
+  margin-bottom: 6px;
+}
+
+.modern-form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: #f0f4fa;
+  border: 1px solid #e1e8f5;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #334155;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.modern-form-group input::placeholder {
+  color: #a7b6cf;
+}
+
+.modern-form-group input:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: #7b9fe8;
+  box-shadow: 0 0 0 3px rgba(123, 159, 232, 0.2);
+}
+
+.modern-auth-button {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(90deg, #669dec, #5389e6);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(91, 146, 229, 0.35);
+}
+
+.modern-auth-button:hover {
+  background: linear-gradient(90deg, #5389e6, #4175d2);
+  box-shadow: 0 6px 16px rgba(91, 146, 229, 0.45);
+  transform: translateY(-1px);
+}
+
+.modern-auth-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(91, 146, 229, 0.35);
+}
+
+.modern-auth-link-text {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: #7b88a0;
+  margin-bottom: 0px;
+}
+
+.modern-auth-link-text a {
+  color: #4a75cc;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 5px;
+  transition: color 0.15s ease;
+}
+
+.modern-auth-link-text a:hover {
+  color: #3359a6;
+  text-decoration: underline;
+}
+
+/* Footer outside the card */
+.modern-auth-footer {
+  margin-top: 35px;
+  font-size: 0.8rem;
+  color: #8fa0ba;
+  text-align: center;
+  z-index: 2;
+  font-weight: 400;
+}
+
+.modern-auth-footer strong {
+  color: #6a7c9f;
+  font-weight: 600;
+}
+
+.modern-auth-error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 10px 14px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  border: 1px solid #fca5a5;
+}

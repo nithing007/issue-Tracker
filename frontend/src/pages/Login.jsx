@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import './Auth.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -61,36 +62,44 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Login</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="modern-auth-page">
+      <div className="modern-auth-wrapper">
+        <div className="modern-auth-bg-layer"></div>
+        <div className="modern-auth-card">
+          <h2>Login</h2>
+          {error && <p className="modern-auth-error">{error}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="modern-form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="abc@gmail.com"
+                required
+              />
+            </div>
+            <div className="modern-form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button type="submit" className="modern-auth-button">Login</button>
+          </form>
+          <p className="modern-auth-link-text">
+            Don&apos;t have an account?{' '}
+            <Link to="/register">Sign Up</Link>
+          </p>
         </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      <p style={{ marginTop: '15px', textAlign: 'center' }}>
-        Don&apos;t have an account?{' '}
-        <Link to="/register" style={{ color: '#4a90e2', fontWeight: 'bold' }}>
-          Sign Up
-        </Link>
-      </p>
+      </div>
+      <div className="modern-auth-footer">
+        © 2026 <strong>Issue Tracker</strong>. All rights reserved.
+      </div>
     </div>
   );
 };

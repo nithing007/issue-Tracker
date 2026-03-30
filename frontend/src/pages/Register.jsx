@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import './Auth.css';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -48,45 +49,54 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Register</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+    <div className="modern-auth-page">
+      <div className="modern-auth-wrapper">
+        <div className="modern-auth-bg-layer"></div>
+        <div className="modern-auth-card">
+          <h2>Register</h2>
+          {error && <p className="modern-auth-error">{error}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="modern-form-group">
+              <label>Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name"
+                required
+              />
+            </div>
+            <div className="modern-form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="abc@gmail.com"
+                required
+              />
+            </div>
+            <div className="modern-form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button type="submit" className="modern-auth-button">Register</button>
+          </form>
+          <p className="modern-auth-link-text">
+            Already have an account?{' '}
+            <Link to="/login">Login</Link>
+          </p>
         </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Register</button>
-      </form>
-      <p style={{ marginTop: '15px', textAlign: 'center' }}>
-        Already have an account?{' '}
-        <Link to="/login" style={{ color: '#4a90e2', fontWeight: 'bold' }}>
-          Login
-        </Link>
-      </p>
+      </div>
+      <div className="modern-auth-footer">
+        © 2026 <strong>Issue Tracker</strong>. All rights reserved.
+      </div>
     </div>
   );
 };
