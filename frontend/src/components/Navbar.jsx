@@ -49,9 +49,6 @@ const Navbar = () => {
                     <Link to="/user-dashboard">Dashboard</Link>
                   </li>
                   <li>
-                    <Link to="/my-complaints">My Complaints</Link>
-                  </li>
-                  <li>
                     <Link to="/raise-complaint">Raise Complaint</Link>
                   </li>
                 </>

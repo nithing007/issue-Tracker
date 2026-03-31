@@ -4,7 +4,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import UserDashboard from './pages/UserDashboard';
-import MyComplaints from './pages/MyComplaints';
 import AdminDashboard from './pages/AdminDashboard';
 import RaiseComplaint from './pages/RaiseComplaint';
 
@@ -51,15 +50,6 @@ const App = () => {
           element={
             <ProtectedRoute allowedRoles={['user', 'student']}>
               <RaiseComplaint />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/my-complaints"
-          element={
-            <ProtectedRoute allowedRoles={['user', 'student']}>
-              <MyComplaints />
             </ProtectedRoute>
           }
         />
