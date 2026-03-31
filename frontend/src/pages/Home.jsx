@@ -139,7 +139,7 @@ const Home = () => {
                                     Raise Complaint
                                 </Button>
                             </Link>
-                            <Link to="/my-complaints">
+                            <Link to="/user-dashboard">
                                 <Button size="large" icon={<DashboardOutlined />} shape="round" style={{ height: '48px', padding: '0 32px', fontSize: '16px' }}>
                                     View Dashboard
                                 </Button>

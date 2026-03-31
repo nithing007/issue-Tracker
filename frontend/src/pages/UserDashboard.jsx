@@ -7,9 +7,14 @@ const UserDashboard = () => {
   const [complaints, setComplaints] = useState([]);
   const [message, setMessage] = useState('');
   const [timeRange, setTimeRange] = useState('All Time');
+  const [expandedRowKeys, setExpandedRowKeys] = useState({});
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
+
+  const toggleRow = (id) => {
+    setExpandedRowKeys(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     if (!token || !(role === 'user' || role === 'student')) {
@@ -59,6 +64,27 @@ const UserDashboard = () => {
     return <span className="status-badge">{status}</span>;
   };
 
+  // Filter complaints based on timeRange
+  const now = new Date();
+  const getFilteredComplaints = () => {
+    if (timeRange === 'All Time') return complaints;
+    
+    return complaints.filter(c => {
+      const createdAt = new Date(c.createdAt);
+      const diffTime = Math.abs(now - createdAt);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (timeRange === '10 Days') {
+        return diffDays <= 10;
+      } else if (timeRange === 'A Month') {
+        return diffDays <= 30;
+      }
+      return true;
+    });
+  };
+
+  const filteredComplaints = getFilteredComplaints();
+
   return (
     <div className="modern-dashboard-bg">
       <Navbar />
@@ -101,22 +127,37 @@ const UserDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {complaints.length > 0 ? (
-                  complaints.map((c) => {
+                {filteredComplaints.length > 0 ? (
+                  filteredComplaints.map((c) => {
                     const date = new Date(c.createdAt);
+                    const isExpanded = expandedRowKeys[c._id];
                     return (
-                      <tr key={c._id}>
-                        <td style={{fontWeight: '500'}}>{c.title}</td>
-                        <td>{c.category || 'General'}</td>
-                        <td>{getStatusBadge(c.status)}</td>
-                        <td>{date.toLocaleDateString('en-GB')}</td>
-                        <td>{date.toLocaleString('default', { month: 'long' })}</td>
-                      </tr>
+                      <React.Fragment key={c._id}>
+                        <tr style={{cursor: 'pointer', transition: 'background-color 0.2s'}} onClick={() => toggleRow(c._id)} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                          <td style={{fontWeight: '500', color: '#1d4ed8'}}>
+                            {c.title} <span style={{fontSize: '0.7rem', marginLeft: '6px', color: '#94a3b8'}}>{isExpanded ? '▲' : '▼'}</span>
+                          </td>
+                          <td>{c.category || 'General'}</td>
+                          <td>{getStatusBadge(c.status)}</td>
+                          <td>{date.toLocaleDateString('en-GB')}</td>
+                          <td>{date.toLocaleString('default', { month: 'long' })}</td>
+                        </tr>
+                        {isExpanded && (
+                          <tr style={{backgroundColor: '#f8fafc', borderLeft: '4px solid #3b82f6'}}>
+                            <td colSpan="5" style={{padding: '16px 24px', borderBottom: '1px solid #e2e8f0'}}>
+                              <div style={{color: '#475569', fontSize: '0.95rem', lineHeight: '1.6'}}>
+                                <strong style={{color: '#334155'}}>Description: </strong>
+                                {c.description || c.remarks || 'No detailed description provided for this complaint.'}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>
+                    <td colSpan="5" style={{textAlign: 'center', padding: '30px', color: '#64748b'}}>
                       No complaints found for this period.
                     </td>
                   </tr>
@@ -125,7 +166,7 @@ const UserDashboard = () => {
             </table>
           </div>
           <div className="dashboard-table-footer">
-            Showing {complaints.length} of {total} complaints
+            Showing {filteredComplaints.length} of {total} complaints
           </div>
         </div>
 
