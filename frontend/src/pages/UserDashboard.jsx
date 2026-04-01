@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Input, Select, Tooltip, Empty } from 'antd';
+import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import Navbar from '../components/Navbar';
 import './Dashboard.css';
 
@@ -8,6 +10,10 @@ const UserDashboard = () => {
   const [message, setMessage] = useState('');
   const [timeRange, setTimeRange] = useState('All Time');
   const [expandedRowKeys, setExpandedRowKeys] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [graphMode, setGraphMode] = useState('count');
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
@@ -58,32 +64,45 @@ const UserDashboard = () => {
 
   const getStatusBadge = (status) => {
     const s = status?.toLowerCase() || '';
-    if (s.includes('resolved')) return <span className="status-badge resolved"><i className="anticon-check-circle" /> Resolved</span>;
-    if (s.includes('progress')) return <span className="status-badge in-progress"><i className="anticon-clock-circle" /> In Progress</span>;
-    if (s.includes('rejected')) return <span className="status-badge rejected"><i className="anticon-close-circle" /> Rejected</span>;
-    return <span className="status-badge">{status}</span>;
+    if (s.includes('resolved')) return <span className="status-badge resolved"><CheckCircleOutlined /> Resolved</span>;
+    if (s.includes('progress')) return <span className="status-badge in-progress"><SyncOutlined spin /> In Progress</span>;
+    if (s.includes('rejected')) return <span className="status-badge rejected"><CloseCircleOutlined /> Rejected</span>;
+    if (s.includes('pending')) return <span className="status-badge pending"><InfoCircleOutlined /> Pending</span>;
+    return <span className="status-badge pending"><InfoCircleOutlined /> {status || 'Pending'}</span>;
   };
 
   // Filter complaints based on timeRange
   const now = new Date();
   const getFilteredComplaints = () => {
-    if (timeRange === 'All Time') return complaints;
+    let result = complaints;
     
-    return complaints.filter(c => {
-      const createdAt = new Date(c.createdAt);
-      const diffTime = Math.abs(now - createdAt);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (timeRange === '10 Days') {
-        return diffDays <= 10;
-      } else if (timeRange === 'A Month') {
-        return diffDays <= 30;
-      }
-      return true;
-    });
+    if (timeRange !== 'All Time') {
+      result = result.filter(c => {
+        const createdAt = new Date(c.createdAt);
+        const diffTime = Math.abs(now - createdAt);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (timeRange === '10 Days') return diffDays <= 10;
+        if (timeRange === 'A Month') return diffDays <= 30;
+        return true;
+      });
+    }
+
+    if (searchQuery) result = result.filter(c => c.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    if (statusFilter !== 'All') {
+      if (statusFilter === 'Pending') result = result.filter(c => c.status?.toLowerCase() === 'pending');
+      else if (statusFilter === 'In Progress') result = result.filter(c => c.status?.toLowerCase().includes('progress'));
+      else if (statusFilter === 'Resolved') result = result.filter(c => c.status?.toLowerCase().includes('resolved'));
+      else if (statusFilter === 'Rejected') result = result.filter(c => c.status?.toLowerCase() === 'rejected');
+    }
+
+    if (categoryFilter !== 'All') result = result.filter(c => (c.category || 'General') === categoryFilter);
+
+    return result;
   };
 
   const filteredComplaints = getFilteredComplaints();
+  const categories = ['All', ...new Set(complaints.map(c => c.category || 'General'))];
 
   return (
     <div className="modern-dashboard-bg">
@@ -97,21 +116,66 @@ const UserDashboard = () => {
       <div className="modern-dashboard-container">
         {message && <p style={{color: 'red', textAlign: 'center'}}>{message}</p>}
 
+        {/* Quick Stats Strip */}
+        <div className="quick-stats-strip">
+          <div className="stat-pill blue-pill hover-lift">
+            <span className="pill-icon">📋</span>
+            <span className="pill-label">Today Complaints</span>
+            <span className="pill-value">{complaints.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString()).length}</span>
+          </div>
+          <div className="stat-pill orange-pill hover-lift">
+            <span className="pill-icon">⏳</span>
+            <span className="pill-label">Pending Today</span>
+            <span className="pill-value">{complaints.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString() && (c.status?.toLowerCase().includes('progress') || c.status?.toLowerCase() === 'pending')).length}</span>
+          </div>
+        </div>
+
         {/* My Complaints Table Card */}
-        <div className="dashboard-card" id="my-complaints">
+        <div className="dashboard-card hover-lift" id="my-complaints">
           <div className="dashboard-card-header">
             <h2 className="dashboard-card-title">My Complaints</h2>
-            <div>
-              <span style={{fontSize: '0.9rem', color: '#64748b', marginRight: '8px', fontWeight: '500'}}>Time Range:</span>
-              <select 
-                className="time-range-select" 
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <span style={{fontSize: '0.9rem', color: '#64748b', fontWeight: '500'}}>Time Range:</span>
+              <Select 
                 value={timeRange} 
-                onChange={(e) => setTimeRange(e.target.value)}
-              >
-                <option value="10 Days">10 Days</option>
-                <option value="A Month">A Month</option>
-                <option value="All Time">All Time</option>
-              </select>
+                onChange={value => setTimeRange(value)}
+                style={{ width: 110 }}
+                options={[
+                  { value: '10 Days', label: '10 Days' },
+                  { value: 'A Month', label: 'A Month' },
+                  { value: 'All Time', label: 'All Time' }
+                ]}
+              />
+            </div>
+          </div>
+
+          <div className="table-controls-bar">
+            <div className="table-controls-left">
+              <Input 
+                prefix={<SearchOutlined style={{color: '#94a3b8'}} />}
+                placeholder="Search by title..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width: 220 }}
+              />
+              <Select 
+                value={statusFilter} 
+                onChange={value => setStatusFilter(value)}
+                style={{ width: 150 }}
+                options={[
+                  { value: 'All', label: 'Filter by Status' },
+                  { value: 'Pending', label: 'Pending' },
+                  { value: 'In Progress', label: 'In Progress' },
+                  { value: 'Resolved', label: 'Resolved' },
+                  { value: 'Rejected', label: 'Rejected' }
+                ]}
+              />
+              <Select 
+                value={categoryFilter} 
+                onChange={value => setCategoryFilter(value)}
+                style={{ width: 150 }}
+                options={categories.map(cat => ({ value: cat, label: cat === 'All' ? 'All Categories' : cat }))}
+              />
             </div>
           </div>
 
@@ -124,6 +188,7 @@ const UserDashboard = () => {
                   <th>STATUS</th>
                   <th>DATE &darr;</th>
                   <th>MONTH</th>
+                  <th style={{textAlign: 'center'}}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,7 +198,7 @@ const UserDashboard = () => {
                     const isExpanded = expandedRowKeys[c._id];
                     return (
                       <React.Fragment key={c._id}>
-                        <tr style={{cursor: 'pointer', transition: 'background-color 0.2s'}} onClick={() => toggleRow(c._id)} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        <tr className="table-row-hover" style={{cursor: 'pointer', transition: 'background-color 0.2s'}} onClick={() => toggleRow(c._id)}>
                           <td style={{fontWeight: '500', color: '#1d4ed8'}}>
                             {c.title} <span style={{fontSize: '0.7rem', marginLeft: '6px', color: '#94a3b8'}}>{isExpanded ? '▲' : '▼'}</span>
                           </td>
@@ -141,10 +206,17 @@ const UserDashboard = () => {
                           <td>{getStatusBadge(c.status)}</td>
                           <td>{date.toLocaleDateString('en-GB')}</td>
                           <td>{date.toLocaleString('default', { month: 'long' })}</td>
+                          <td style={{textAlign: 'center'}} onClick={(e) => e.stopPropagation()}>
+                            <div className="table-actions">
+                              <Tooltip title="View"><EyeOutlined className="action-icon view-icon" /></Tooltip>
+                              <Tooltip title="Edit"><EditOutlined className="action-icon edit-icon" /></Tooltip>
+                              <Tooltip title="Delete"><DeleteOutlined className="action-icon delete-icon" /></Tooltip>
+                            </div>
+                          </td>
                         </tr>
                         {isExpanded && (
                           <tr style={{backgroundColor: '#f8fafc', borderLeft: '4px solid #3b82f6'}}>
-                            <td colSpan="5" style={{padding: '16px 24px', borderBottom: '1px solid #e2e8f0'}}>
+                            <td colSpan="6" style={{padding: '16px 24px', borderBottom: '1px solid #e2e8f0'}}>
                               <div style={{color: '#475569', fontSize: '0.95rem', lineHeight: '1.6'}}>
                                 <strong style={{color: '#334155'}}>Description: </strong>
                                 {c.description || c.remarks || 'No detailed description provided for this complaint.'}
@@ -157,8 +229,8 @@ const UserDashboard = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="5" style={{textAlign: 'center', padding: '30px', color: '#64748b'}}>
-                      No complaints found for this period.
+                    <td colSpan="6" style={{textAlign: 'center', padding: '50px 0'}}>
+                      <Empty description={<span style={{color: '#94a3b8', fontSize: '1rem'}}>No complaints found</span>} />
                     </td>
                   </tr>
                 )}
@@ -176,46 +248,62 @@ const UserDashboard = () => {
           {/* LEFT COLUMN */}
           <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
             
+            {/* Alert Box */}
+            <div className="notification-alert">
+              <InfoCircleOutlined className="alert-icon" />
+              <div className="alert-content">
+                <div className="alert-text">2 complaints pending more than 3 days</div>
+                <div className="alert-text">1 complaint awaiting admin response</div>
+              </div>
+            </div>
+
             {/* Complaint Summary */}
-            <div className="dashboard-card">
+            <div className="dashboard-card hover-lift">
               <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>Complaint Summary</h2>
               
               <div className="summary-blocks">
-                <div className="summary-block total">
+                <div className="summary-block total hover-lift-subtle">
                   <div className="summary-icon">📋</div>
                   <div className="summary-label">Total</div>
                   <div className="summary-value">{total}</div>
+                  <div className="summary-trend"><span>+2</span> this week</div>
                 </div>
-                <div className="summary-block resolved">
+                <div className="summary-block resolved hover-lift-subtle">
                   <div className="summary-icon">✅</div>
                   <div className="summary-label">Resolved</div>
                   <div className="summary-value">{resolved}</div>
+                  <div className="summary-trend positive"><span>+1</span> this week</div>
                 </div>
-                <div className="summary-block in-progress">
+                <div className="summary-block in-progress hover-lift-subtle">
                   <div className="summary-icon">⏳</div>
                   <div className="summary-label">In Progress</div>
                   <div className="summary-value">{inProgress}</div>
+                  <div className="summary-trend warning"><span>-1</span> pending</div>
                 </div>
-                <div className="summary-block rejected">
+                <div className="summary-block rejected hover-lift-subtle">
                   <div className="summary-icon">❌</div>
                   <div className="summary-label">Rejected</div>
                   <div className="summary-value">{rejected}</div>
+                  <div className="summary-trend negative"><span>0</span> this week</div>
                 </div>
               </div>
 
-              <div className="resolution-rate">Resolution Rate: {resolutionRate}%</div>
+              <div className="resolution-rate-container">
+                <div className="resolution-rate">Resolution Rate: {resolutionRate}%</div>
+                <div className="resolution-trend positive">+2% vs last month</div>
+              </div>
               <div className="progress-bar-container">
                 <div className="progress-bar-fill" style={{width: `${resolutionRate}%`}}></div>
               </div>
             </div>
 
             {/* Recent Updates */}
-            <div className="dashboard-card">
+            <div className="dashboard-card hover-lift">
               <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>
                 <span style={{marginRight: '8px'}}>🕒</span> Recent Updates
               </h2>
               
-              <div className="updates-list">
+              <div className="updates-timeline">
                 {complaints.slice(0, 3).map((c, i) => (
                   <div className="update-item" key={c._id || i}>
                     <div className={`update-dot ${
@@ -243,14 +331,36 @@ const UserDashboard = () => {
           <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
             
             {/* Complaints Overview Chart */}
-            <div className="dashboard-card">
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+            <div className="dashboard-card hover-lift">
+              <div className="graph-header-controls">
                 <h2 className="dashboard-card-title">Complaints Overview</h2>
-                <div style={{display: 'flex', gap: '12px', fontSize: '0.75rem', fontWeight: '600'}}>
-                  <span style={{color: '#22c55e'}}>⬜ Resolved</span>
-                  <span style={{color: '#f59e0b'}}>⬜ In Progress</span>
-                  <span style={{color: '#ef4444'}}>⬜ Rejected</span>
+                <div className="graph-controls-right">
+                  <div className="graph-toggles">
+                    <button className={`graph-toggle ${graphMode === 'count' ? 'active' : ''}`} onClick={() => setGraphMode('count')}>
+                      Complaints Count
+                    </button>
+                    <button className={`graph-toggle ${graphMode === 'distribution' ? 'active' : ''}`} onClick={() => setGraphMode('distribution')}>
+                      Status Dist.
+                    </button>
+                  </div>
+                  <Select 
+                    value={timeRange} 
+                    onChange={value => setTimeRange(value)}
+                    size="small"
+                    style={{ width: 100 }}
+                    options={[
+                      { value: '10 Days', label: '10 Days' },
+                      { value: 'A Month', label: 'A Month' },
+                      { value: 'All Time', label: 'All Time' }
+                    ]}
+                  />
                 </div>
+              </div>
+              
+              <div style={{display: 'flex', justifyContent: 'flex-end', gap: '12px', fontSize: '0.75rem', fontWeight: '600', margin: '0 0 10px 0'}}>
+                <span style={{color: '#22c55e'}}>⬜ Resolved</span>
+                <span style={{color: '#f59e0b'}}>⬜ In Progress</span>
+                <span style={{color: '#ef4444'}}>⬜ Rejected</span>
               </div>
               
               {/* Static SVG Chart exactly matching user Mock */}
@@ -311,7 +421,7 @@ const UserDashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="dashboard-card">
+            <div className="dashboard-card hover-lift">
               <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>
                 <span style={{marginRight: '8px', color: '#f59e0b'}}>⚡</span> Quick Actions
               </h2>
