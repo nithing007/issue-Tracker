@@ -85,9 +85,65 @@ const updateComplaintStatus = async (req, res) => {
   }
 };
 
+const updateComplaint = async (req, res) => {
+  const { title, description, category } = req.body;
+
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+      return res.status(404).json({ message: 'Complaint not found' });
+    }
+
+    // Check ownership
+    if (complaint.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // Only allow update if pending
+    if (complaint.status !== 'Pending') {
+      return res.status(400).json({ message: 'Cannot edit complaint once it is processed' });
+    }
+
+    complaint.title = title || complaint.title;
+    complaint.description = description || complaint.description;
+    complaint.category = category || complaint.category;
+
+    await complaint.save();
+    res.json(complaint);
+  } catch {
+    res.status(500).json({ message: 'Failed to update complaint' });
+  }
+};
+
+const deleteComplaint = async (req, res) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+      return res.status(404).json({ message: 'Complaint not found' });
+    }
+
+    // Check ownership
+    if (complaint.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // Allow deletion of any complaint regardless of status
+    // (User requested deletion from dashboard and database upon clicking delete and yes)
+
+    await complaint.deleteOne();
+    res.json({ message: 'Complaint removed' });
+  } catch {
+    res.status(500).json({ message: 'Failed to delete complaint' });
+  }
+};
+
 module.exports = {
   createComplaint,
   getMyComplaints,
   getAllComplaints,
   updateComplaintStatus,
+  updateComplaint,
+  deleteComplaint,
 };

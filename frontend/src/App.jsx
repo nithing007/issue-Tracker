@@ -3,9 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
-import UserDashboard from './pages/UserDashboard';
-import AdminDashboard from './pages/AdminDashboard';
+import UserPanel from './pages/UserPanel';
+import AdminPanel from './pages/AdminPanel';
 import RaiseComplaint from './pages/RaiseComplaint';
+import Profile from './pages/Profile';
 
 // Reusable Route Guard Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -37,10 +38,10 @@ const App = () => {
         />
 
         <Route
-          path="/user-dashboard"
+          path="/user-panel"
           element={
             <ProtectedRoute allowedRoles={['user', 'student']}>
-              <UserDashboard />
+              <UserPanel />
             </ProtectedRoute>
           }
         />
@@ -55,10 +56,19 @@ const App = () => {
         />
 
         <Route
-          path="/admin-dashboard"
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={['user', 'student', 'admin']}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-panel"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
+              <AdminPanel />
             </ProtectedRoute>
           }
         />

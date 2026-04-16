@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Input, Select, Tooltip, Empty } from 'antd';
-import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Input, Select, Tooltip, Empty, Modal, Form, message, Popconfirm, Button } from 'antd';
+import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
 import Navbar from '../components/Navbar';
 import './Dashboard.css';
 
-const UserDashboard = () => {
+const UserPanel = () => {
   const [complaints, setComplaints] = useState([]);
-  const [message, setMessage] = useState('');
+  const [statusMsg, setStatusMsg] = useState('');
   const [timeRange, setTimeRange] = useState('All Time');
   const [expandedRowKeys, setExpandedRowKeys] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [graphMode, setGraphMode] = useState('count');
+  
+  // Modal states
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [editForm] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
@@ -48,10 +56,78 @@ const UserDashboard = () => {
       if (response.ok) {
         setComplaints(data);
       } else {
-        setMessage('Failed to load complaints');
+        setStatusMsg('Failed to load complaints');
       }
     } catch (error) {
-      setMessage('Unable to load complaints');
+      setStatusMsg('Unable to load complaints');
+    }
+  };
+
+  const handleView = (complaint) => {
+    setSelectedComplaint(complaint);
+    setViewModalVisible(true);
+  };
+
+  const handleEdit = (complaint) => {
+    if (complaint.status !== 'Pending') {
+      message.warning('Only pending complaints can be edited');
+      return;
+    }
+    setSelectedComplaint(complaint);
+    editForm.setFieldsValue({
+      title: complaint.title,
+      category: complaint.category,
+      description: complaint.description
+    });
+    setEditModalVisible(true);
+  };
+
+  const handleDelete = async (id) => {
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/complaints/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        message.success('Complaint deleted successfully');
+        fetchComplaints();
+      } else {
+        const data = await response.json();
+        message.error(data.message || 'Failed to delete complaint');
+      }
+    } catch (error) {
+      message.error('Server error. Please try again.');
+    }
+  };
+
+  const onUpdate = async (values) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/complaints/${selectedComplaint._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        message.success('Complaint updated successfully');
+        setEditModalVisible(false);
+        fetchComplaints();
+      } else {
+        const data = await response.json();
+        message.error(data.message || 'Update failed');
+      }
+    } catch (error) {
+      message.error('Server error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,7 +190,7 @@ const UserDashboard = () => {
       </div>
 
       <div className="modern-dashboard-container">
-        {message && <p style={{color: 'red', textAlign: 'center'}}>{message}</p>}
+        {statusMsg && <p style={{color: 'red', textAlign: 'center'}}>{statusMsg}</p>}
 
         {/* Quick Stats Strip */}
         <div className="quick-stats-strip">
@@ -208,9 +284,17 @@ const UserDashboard = () => {
                           <td>{date.toLocaleString('default', { month: 'long' })}</td>
                           <td style={{textAlign: 'center'}} onClick={(e) => e.stopPropagation()}>
                             <div className="table-actions">
-                              <Tooltip title="View"><EyeOutlined className="action-icon view-icon" /></Tooltip>
-                              <Tooltip title="Edit"><EditOutlined className="action-icon edit-icon" /></Tooltip>
-                              <Tooltip title="Delete"><DeleteOutlined className="action-icon delete-icon" /></Tooltip>
+                              <Tooltip title="View"><EyeOutlined className="action-icon view-icon" onClick={() => handleView(c)} /></Tooltip>
+                              <Tooltip title="Edit"><EditOutlined className="action-icon edit-icon" onClick={() => handleEdit(c)} /></Tooltip>
+                              <Popconfirm
+                                title="Delete the complaint"
+                                description="Are you sure to delete this complaint?"
+                                onConfirm={() => handleDelete(c._id)}
+                                okText="Yes"
+                                cancelText="No"
+                              >
+                                <Tooltip title="Delete"><DeleteOutlined className="action-icon delete-icon" /></Tooltip>
+                              </Popconfirm>
                             </div>
                           </td>
                         </tr>
@@ -457,8 +541,117 @@ const UserDashboard = () => {
       <div className="dashboard-footer">
         &copy; 2026 <strong>Complaint Tracker</strong>. All rights reserved.
       </div>
+
+       {/* View Modal */}
+       <Modal
+          title={<span style={{fontSize: '1.25rem', fontWeight: '600', color: '#1e3a8a'}}><EyeOutlined style={{marginRight: '8px'}} /> Complaint Details</span>}
+          open={viewModalVisible}
+          onCancel={() => setViewModalVisible(false)}
+          footer={[
+            <Button key="close" type="primary" onClick={() => setViewModalVisible(false)} style={{borderRadius: '8px', background: '#1e3a8a'}}>
+              Close
+            </Button>
+          ]}
+          width={700}
+          centered
+          className="custom-modal"
+          styles={{body: {padding: '24px'}}}
+        >
+          {selectedComplaint && (
+            <div className="view-details-content">
+              <div style={{marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <h3 style={{fontSize: '1.2rem', color: '#334155', margin: 0}}>{selectedComplaint.title}</h3>
+                {getStatusBadge(selectedComplaint.status)}
+              </div>
+              
+              <div className="detail-item" style={{marginBottom: '16px'}}>
+                <strong style={{display: 'block', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px'}}>Category</strong>
+                <span style={{color: '#1e293b', fontWeight: '500'}}>{selectedComplaint.category || 'General'}</span>
+              </div>
+
+              <div className="detail-item" style={{marginBottom: '16px'}}>
+                <strong style={{display: 'block', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px'}}>Description</strong>
+                <p style={{color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0'}}>
+                  {selectedComplaint.description}
+                </p>
+              </div>
+
+              <div style={{display: 'flex', gap: '32px', borderTop: '1px solid #f1f5f9', paddingTop: '16px'}}>
+                <div className="detail-item">
+                  <strong style={{display: 'block', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '4px'}}>Submitted On</strong>
+                  <span style={{color: '#475569'}}>{new Date(selectedComplaint.createdAt).toLocaleDateString('en-GB')}</span>
+                </div>
+                <div className="detail-item">
+                  <strong style={{display: 'block', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '4px'}}>Last Updated</strong>
+                  <span style={{color: '#475569'}}>{new Date(selectedComplaint.updatedAt).toLocaleDateString('en-GB')}</span>
+                </div>
+              </div>
+
+              {selectedComplaint.remarks && (
+                <div className="detail-item" style={{marginTop: '20px', padding: '12px', background: '#ecfdf5', borderRadius: '8px', border: '1px solid #a7f3d0'}}>
+                  <strong style={{display: 'block', color: '#065f46', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '4px'}}>Admin Remarks</strong>
+                  <p style={{color: '#065f46', margin: 0, fontSize: '0.95rem'}}>{selectedComplaint.remarks}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </Modal>
+
+        {/* Edit Modal */}
+        <Modal
+          title={<span style={{fontSize: '1.25rem', fontWeight: '600', color: '#d97706'}}><EditOutlined style={{marginRight: '8px'}} /> Edit Complaint</span>}
+          open={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          footer={null}
+          width={600}
+          centered
+        >
+          <Form
+            form={editForm}
+            layout="vertical"
+            onFinish={onUpdate}
+            style={{paddingTop: '12px'}}
+          >
+            <Form.Item
+              name="title"
+              label="Complaint Title"
+              rules={[{ required: true, message: 'Please enter title' }]}
+            >
+              <Input placeholder="Brief title of the issue" style={{borderRadius: '8px', padding: '10px'}} />
+            </Form.Item>
+
+            <Form.Item
+              name="category"
+              label="Category"
+              rules={[{ required: true, message: 'Please select category' }]}
+            >
+              <Select placeholder="Select category" style={{borderRadius: '8px'}}>
+                {categories.filter(c => c !== 'All').map(cat => (
+                  <Select.Option key={cat} value={cat}>{cat}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="description"
+              label="Detailed Description"
+              rules={[{ required: true, message: 'Please enter description' }]}
+            >
+              <Input.TextArea rows={5} placeholder="Explain the issue in detail..." style={{borderRadius: '8px'}} />
+            </Form.Item>
+
+            <div style={{display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px'}}>
+              <Button onClick={() => setEditModalVisible(false)} style={{borderRadius: '8px', height: '40px', padding: '0 20px'}}>
+                Cancel
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loading} style={{borderRadius: '8px', height: '40px', padding: '0 24px', background: '#d97706', border: 'none'}}>
+                Update Complaint
+              </Button>
+            </div>
+          </Form>
+        </Modal>
     </div>
   );
 };
 
-export default UserDashboard;
+export default UserPanel;

@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
+import { useUser } from '../context/UserContext';
+import { GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 const Login = () => {
+  const { updateUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,12 +16,39 @@ const Login = () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
-    if (token && role === 'admin') {
-      navigate('/admin-dashboard');
-    } else if (token && (role === 'user' || role === 'student')) {
-      navigate('/home');
+    if (token) {
+      if (role === 'admin') {
+        navigate('/admin-panel');
+      } else {
+        navigate('/home');
+      }
     }
   }, [navigate]);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const { credential } = credentialResponse;
+      const response = await axios.post('http://localhost:5000/api/auth/google', {
+        token: credential
+      });
+
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', user.role);
+      
+      updateUser(user);
+
+      if (user.role === 'admin') {
+        navigate('/admin-panel');
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      setError(err.response?.data?.message || 'Google login failed');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,11 +79,11 @@ const Login = () => {
       localStorage.setItem('role', role);
 
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        updateUser(data.user);
       }
 
       if (role === 'admin') {
-        navigate('/admin-dashboard');
+        navigate('/admin-panel');
       } else {
         navigate('/home');
       }
@@ -91,6 +122,21 @@ const Login = () => {
             </div>
             <button type="submit" className="modern-auth-button">Login</button>
           </form>
+
+          <div className="modern-auth-divider">or</div>
+
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google Login Failed')}
+                useOneTap
+                theme="outline"
+                shape="rectangular"
+                width="100%"
+                text="continue_with"
+            />
+          </div>
+
           <p className="modern-auth-link-text">
             Don&apos;t have an account?{' '}
             <Link to="/register">Sign Up</Link>

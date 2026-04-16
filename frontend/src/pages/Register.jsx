@@ -1,13 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
+import { useUser } from '../context/UserContext';
+import { GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 const Register = () => {
+  const { updateUser } = useUser();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const { credential } = credentialResponse;
+      const response = await axios.post('http://localhost:5000/api/auth/google', {
+        token: credential
+      });
+
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', user.role);
+      
+      updateUser(user);
+
+      if (user.role === 'admin') {
+        navigate('/admin-panel');
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Google register error:', err);
+      setError(err.response?.data?.message || 'Google registration failed');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +67,10 @@ const Register = () => {
       localStorage.setItem('role', role);
 
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        updateUser(data.user);
       }
 
-      navigate('/user-dashboard');
+      navigate('/user-panel');
 
     } catch {
       setError('Server error');
@@ -88,6 +117,21 @@ const Register = () => {
             </div>
             <button type="submit" className="modern-auth-button">Register</button>
           </form>
+
+          <div className="modern-auth-divider">or</div>
+
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google Registration Failed')}
+                useOneTap
+                theme="outline"
+                shape="rectangular"
+                width="100%"
+                text="continue_with"
+            />
+          </div>
+
           <p className="modern-auth-link-text">
             Already have an account?{' '}
             <Link to="/login">Login</Link>

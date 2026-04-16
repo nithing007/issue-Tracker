@@ -168,3 +168,57 @@
   font-size: 0.85rem;
   border: 1px solid #fca5a5;
 }
+
+.modern-auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 25px 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.modern-auth-divider::before,
+.modern-auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e1e8f5;
+}
+
+.modern-auth-divider:not(:empty)::before {
+  margin-right: .85em;
+}
+
+.modern-auth-divider:not(:empty)::after {
+  margin-left: .85em;
+}
+
+.modern-google-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px;
+  background-color: #f5f7fb;
+  border: 1px solid #e1e8f5;
+  border-radius: 6px;
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.modern-google-button:hover {
+  background-color: #ffffff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.modern-google-button img {
+  width: 18px;
+  height: 18px;
+}
