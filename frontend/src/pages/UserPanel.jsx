@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Input, Select, Tooltip, Empty, Modal, Form, message, Popconfirm, Button } from 'antd';
-import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, PaperClipOutlined, DownloadOutlined, SendOutlined } from '@ant-design/icons';
 import Navbar from '../components/Navbar';
 import './Dashboard.css';
 
@@ -13,14 +13,21 @@ const UserPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [priorityFilter, setPriorityFilter] = useState('All');
   const [graphMode, setGraphMode] = useState('count');
   
   // Modal states
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [attachmentModalVisible, setAttachmentModalVisible] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [editForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  
+  // Comment states
+  const [commentText, setCommentText] = useState('');
+  const [commentAttachments, setCommentAttachments] = useState([]);
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -140,11 +147,84 @@ const UserPanel = () => {
 
   const getStatusBadge = (status) => {
     const s = status?.toLowerCase() || '';
-    if (s.includes('resolved')) return <span className="status-badge resolved"><CheckCircleOutlined /> Resolved</span>;
-    if (s.includes('progress')) return <span className="status-badge in-progress"><SyncOutlined spin /> In Progress</span>;
-    if (s.includes('rejected')) return <span className="status-badge rejected"><CloseCircleOutlined /> Rejected</span>;
-    if (s.includes('pending')) return <span className="status-badge pending"><InfoCircleOutlined /> Pending</span>;
-    return <span className="status-badge pending"><InfoCircleOutlined /> {status || 'Pending'}</span>;
+    if (s.includes('resolved')) return <span className="status-badge" style={{background: '#d1fae5', color: '#065f46', padding: '4px 12px', borderRadius: '9999px', fontWeight: 'bold'}}><CheckCircleOutlined /> Resolved</span>;
+    if (s.includes('progress')) return <span className="status-badge" style={{background: '#ffedd5', color: '#c2410c', padding: '4px 12px', borderRadius: '9999px', fontWeight: 'bold'}}><SyncOutlined spin /> In Progress</span>;
+    if (s.includes('rejected')) return <span className="status-badge" style={{background: '#fee2e2', color: '#b91c1c', padding: '4px 12px', borderRadius: '9999px', fontWeight: 'bold'}}><CloseCircleOutlined /> Rejected</span>;
+    if (s.includes('pending')) return <span className="status-badge" style={{background: '#dbeafe', color: '#1d4ed8', padding: '4px 12px', borderRadius: '9999px', fontWeight: 'bold'}}><InfoCircleOutlined /> Pending</span>;
+    return <span className="status-badge" style={{background: '#dbeafe', color: '#1d4ed8', padding: '4px 12px', borderRadius: '9999px', fontWeight: 'bold'}}><InfoCircleOutlined /> {status || 'Pending'}</span>;
+  };
+
+  const getPriorityBadge = (priority) => {
+    if (priority === 'High') return <span style={{background: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold'}}>High</span>;
+    if (priority === 'Low') return <span style={{background: '#ecfdf5', color: '#065f46', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold'}}>Low</span>;
+    return <span style={{background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold'}}>Medium</span>;
+  };
+
+  const handleDownload = (complaint) => {
+    const content = `COMPLAINT DETAILS
+--------------------
+Title: ${complaint.title}
+Category: ${complaint.category}
+Priority: ${complaint.priority || 'Medium'}
+Status: ${complaint.status}
+Date: ${new Date(complaint.createdAt).toLocaleDateString()}
+
+Description:
+${complaint.description}
+
+Estimated Resolution: 2-3 days
+${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Complaint_${complaint.title.substring(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCommentFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+        if (file.size > 5 * 1024 * 1024) return;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setCommentAttachments(prev => [...prev, {
+                name: file.name,
+                type: file.type,
+                url: reader.result,
+                size: file.size,
+                uploadedBy: 'User'
+            }]);
+        };
+        reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAddComment = async (complaintId) => {
+    if (!commentText.trim() && commentAttachments.length === 0) return;
+    
+    try {
+      const response = await fetch(`http://localhost:5000/api/complaints/${complaintId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          newComment: { text: commentText, attachments: commentAttachments } 
+        }),
+      });
+
+      if (response.ok) {
+        setCommentText('');
+        setCommentAttachments([]);
+        fetchComplaints(); // refresh data
+      }
+    } catch (e) {
+      message.error('Failed to add comment');
+    }
   };
 
   // Filter complaints based on timeRange
@@ -173,6 +253,7 @@ const UserPanel = () => {
     }
 
     if (categoryFilter !== 'All') result = result.filter(c => (c.category || 'General') === categoryFilter);
+    if (priorityFilter !== 'All') result = result.filter(c => (c.priority || 'Medium') === priorityFilter);
 
     return result;
   };
@@ -252,6 +333,17 @@ const UserPanel = () => {
                 style={{ width: 150 }}
                 options={categories.map(cat => ({ value: cat, label: cat === 'All' ? 'All Categories' : cat }))}
               />
+              <Select 
+                value={priorityFilter} 
+                onChange={value => setPriorityFilter(value)}
+                style={{ width: 150 }}
+                options={[
+                  { value: 'All', label: 'All Priorities' },
+                  { value: 'Low', label: 'Low ' },
+                  { value: 'Medium', label: 'Medium' },
+                  { value: 'High', label: 'High' }
+                ]}
+              />
             </div>
           </div>
 
@@ -260,10 +352,11 @@ const UserPanel = () => {
               <thead>
                 <tr>
                   <th>TITLE</th>
+                  <th>PRIORITY</th>
                   <th>CATEGORY</th>
                   <th>STATUS</th>
                   <th>DATE &darr;</th>
-                  <th>MONTH</th>
+                  <th>FILES</th>
                   <th style={{textAlign: 'center'}}>ACTIONS</th>
                 </tr>
               </thead>
@@ -278,13 +371,15 @@ const UserPanel = () => {
                           <td style={{fontWeight: '500', color: '#1d4ed8'}}>
                             {c.title} <span style={{fontSize: '0.7rem', marginLeft: '6px', color: '#94a3b8'}}>{isExpanded ? '▲' : '▼'}</span>
                           </td>
+                          <td>{getPriorityBadge(c.priority || 'Medium')}</td>
                           <td>{c.category || 'General'}</td>
                           <td>{getStatusBadge(c.status)}</td>
                           <td>{date.toLocaleDateString('en-GB')}</td>
-                          <td>{date.toLocaleString('default', { month: 'long' })}</td>
+                          <td>{c.attachments && c.attachments.length > 0 ? <Tooltip title={`${c.attachments.length} attachment(s)`}><PaperClipOutlined style={{color: '#64748b'}} /></Tooltip> : '-'}</td>
                           <td style={{textAlign: 'center'}} onClick={(e) => e.stopPropagation()}>
                             <div className="table-actions">
                               <Tooltip title="View"><EyeOutlined className="action-icon view-icon" onClick={() => handleView(c)} /></Tooltip>
+                              <Tooltip title="Download"><DownloadOutlined className="action-icon" style={{color: '#10b981'}} onClick={() => handleDownload(c)} /></Tooltip>
                               <Tooltip title="Edit"><EditOutlined className="action-icon edit-icon" onClick={() => handleEdit(c)} /></Tooltip>
                               <Popconfirm
                                 title="Delete the complaint"
@@ -300,10 +395,66 @@ const UserPanel = () => {
                         </tr>
                         {isExpanded && (
                           <tr style={{backgroundColor: '#f8fafc', borderLeft: '4px solid #3b82f6'}}>
-                            <td colSpan="6" style={{padding: '16px 24px', borderBottom: '1px solid #e2e8f0'}}>
-                              <div style={{color: '#475569', fontSize: '0.95rem', lineHeight: '1.6'}}>
-                                <strong style={{color: '#334155'}}>Description: </strong>
-                                {c.description || c.remarks || 'No detailed description provided for this complaint.'}
+                            <td colSpan="7" style={{padding: '16px 24px', borderBottom: '1px solid #e2e8f0'}}>
+                              <div style={{display: 'flex', flexDirection: 'column', gap: '16px', color: '#475569', fontSize: '0.95rem', lineHeight: '1.6'}}>
+                                {/* Timeline */}
+                                <div style={{display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0'}}>
+                                  <div style={{flex: 1, textAlign: 'center', fontWeight: 'bold', color: '#3b82f6'}}>🔵 Submitted</div>
+                                  <div style={{height: '2px', background: c.status === 'Pending' ? '#e2e8f0' : '#3b82f6', flex: 1}}></div>
+                                  <div style={{flex: 1, textAlign: 'center', fontWeight: c.status !== 'Pending' ? 'bold' : 'normal', color: c.status !== 'Pending' ? '#f59e0b' : '#94a3b8'}}>{c.status !== 'Pending' ? '🟠 In Progress' : '⚪ In Progress'}</div>
+                                  <div style={{height: '2px', background: ['Resolved', 'Rejected'].includes(c.status) ? (c.status === 'Resolved' ? '#22c55e' : '#ef4444') : '#e2e8f0', flex: 1}}></div>
+                                  <div style={{flex: 1, textAlign: 'center', fontWeight: ['Resolved', 'Rejected'].includes(c.status) ? 'bold' : 'normal', color: c.status === 'Resolved' ? '#22c55e' : (c.status === 'Rejected' ? '#ef4444' : '#94a3b8')}}>
+                                    {c.status === 'Resolved' ? '🟢 Resolved' : (c.status === 'Rejected' ? '🔴 Rejected' : '⚪ Resolved/Rejected')}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <strong style={{color: '#334155'}}>Description: </strong>
+                                  {c.description || 'No detailed description provided.'}
+                                </div>
+                                <div style={{fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic'}}>Estimated resolution: 2-3 days</div>
+
+                                {/* Attachments */}
+                                {c.attachments && c.attachments.length > 0 && (
+                                  <div>
+                                    <strong style={{color: '#334155'}}>Attachments ({c.attachments.length}):</strong>
+                                    <div style={{display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap'}}>
+                                      {c.attachments.map((att, i) => (
+                                        <div key={i} onClick={() => { setPreviewAttachment(att); setAttachmentModalVisible(true); }} style={{border: '1px solid #cbd5e1', padding: '4px', borderRadius: '4px', cursor: 'pointer', background: '#fff', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                          {att.type.includes('image') ? <img src={att.url} alt="att" style={{width: '30px', height: '30px', objectFit: 'cover'}} /> : <PaperClipOutlined />}
+                                          <span style={{fontSize: '0.8rem', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{att.name}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Comments / Reply Section */}
+                                <div style={{background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '12px'}}>
+                                  <strong style={{color: '#334155', display: 'block', marginBottom: '12px'}}>Discussion</strong>
+                                  <div style={{maxHeight: '150px', overflowY: 'auto', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                    {(!c.comments || c.comments.length === 0) && <div style={{color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center'}}>No comments yet.</div>}
+                                    {c.comments && c.comments.map((cm, i) => (
+                                      <div key={i} style={{alignSelf: cm.sender === 'User' ? 'flex-end' : 'flex-start', background: cm.sender === 'User' ? '#dbeafe' : '#f1f5f9', padding: '8px 12px', borderRadius: '8px', maxWidth: '80%'}}>
+                                        <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '4px', fontWeight: 'bold'}}>{cm.sender} <span style={{fontWeight: 'normal'}}>{new Date(cm.date).toLocaleString()}</span></div>
+                                        <div>{cm.text}</div>
+                                        {cm.attachments && cm.attachments.length > 0 && (
+                                          <div style={{display: 'flex', gap: '4px', marginTop: '4px'}}>
+                                            {cm.attachments.map((a, j) => (
+                                              <span key={j} onClick={() => { setPreviewAttachment(a); setAttachmentModalVisible(true); }} style={{color: '#1d4ed8', cursor: 'pointer', fontSize: '0.8rem'}}><PaperClipOutlined /> {a.name}</span>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                                    <Input placeholder="Type a comment..." value={commentText} onChange={e => setCommentText(e.target.value)} onPressEnter={() => handleAddComment(c._id)} />
+                                    <label style={{cursor: 'pointer', color: '#64748b'}}><input type="file" multiple style={{display: 'none'}} onChange={handleCommentFileChange} /><PaperClipOutlined fontSize="large" /></label>
+                                    <Button type="primary" icon={<SendOutlined />} onClick={() => handleAddComment(c._id)} />
+                                  </div>
+                                  {commentAttachments.length > 0 && <div style={{fontSize: '0.75rem', color: '#10b981', marginTop: '4px'}}>{commentAttachments.length} file(s) attached</div>}
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -313,7 +464,7 @@ const UserPanel = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="6" style={{textAlign: 'center', padding: '50px 0'}}>
+                    <td colSpan="7" style={{textAlign: 'center', padding: '50px 0'}}>
                       <Empty description={<span style={{color: '#94a3b8', fontSize: '1rem'}}>No complaints found</span>} />
                     </td>
                   </tr>
@@ -376,8 +527,11 @@ const UserPanel = () => {
                 <div className="resolution-rate">Resolution Rate: {resolutionRate}%</div>
                 <div className="resolution-trend positive">+2% vs last month</div>
               </div>
-              <div className="progress-bar-container">
+              <div className="progress-bar-container" style={{marginBottom: '10px'}}>
                 <div className="progress-bar-fill" style={{width: `${resolutionRate}%`}}></div>
+              </div>
+              <div style={{fontSize: '0.85rem', color: '#64748b', textAlign: 'center'}}>
+                Resolution rate improved by 10% this week.
               </div>
             </div>
 
@@ -649,6 +803,38 @@ const UserPanel = () => {
               </Button>
             </div>
           </Form>
+        </Modal>
+
+        {/* Attachment Preview Modal */}
+        <Modal
+          title={<span style={{fontWeight: 'bold'}}>Preview Attachment</span>}
+          open={attachmentModalVisible}
+          footer={
+            <Button type="primary" icon={<DownloadOutlined />} onClick={() => {
+              const a = document.createElement('a');
+              a.href = previewAttachment?.url;
+              a.download = previewAttachment?.name;
+              a.click();
+            }}>
+              Download
+            </Button>
+          }
+          onCancel={() => setAttachmentModalVisible(false)}
+        >
+          {previewAttachment && (
+            <div style={{textAlign: 'center'}}>
+              {previewAttachment.type.includes('image') ? (
+                <img src={previewAttachment.url} alt="preview" style={{maxWidth: '100%', maxHeight: '400px'}} />
+              ) : (
+                <p style={{padding: '40px', background: '#f1f5f9', borderRadius: '8px', fontWeight: 'bold'}}>
+                  {previewAttachment.name} (PDF/Document)
+                </p>
+              )}
+              <div style={{marginTop: '10px', fontSize: '0.85rem', color: '#64748b'}}>
+                Uploaded by: {previewAttachment.uploadedBy || 'User'}
+              </div>
+            </div>
+          )}
         </Modal>
     </div>
   );

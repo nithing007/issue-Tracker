@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import './AdminPanel.css';
+import { Modal, Button, Input } from 'antd';
 import {
   CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined,
   SearchOutlined, FilterOutlined, DownOutlined,
   UpOutlined, MessageOutlined, AppstoreOutlined,
-  CheckOutlined, SyncOutlined, StopOutlined, UserOutlined, PlusCircleOutlined
+  CheckOutlined, SyncOutlined, StopOutlined, UserOutlined, PlusCircleOutlined,
+  PaperClipOutlined, SendOutlined, DownloadOutlined
 } from '@ant-design/icons';
 
 const getPriority = (complaint) => {
@@ -305,6 +307,26 @@ const AdminRow = ({ complaint, isSelected, onSelect, onUpdate }) => {
   const [popupOpen, setPopupOpen] = useState(false);
   const [newStatus, setNewStatus] = useState(complaint.status);
   const [newRemarks, setNewRemarks] = useState(complaint.remarks || '');
+  
+  const [attachmentModalVisible, setAttachmentModalVisible] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState(null);
+  
+  const [commentText, setCommentText] = useState('');
+  
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/complaints/${complaint._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ newComment: { text: commentText, sender: 'Admin' } })
+      });
+      if (response.ok) {
+         setCommentText('');
+         window.location.reload(); // Simple refresh to show new comment
+      }
+    } catch {}
+  };
 
   const handleSaveStatus = () => {
     onUpdate(complaint._id, newStatus, newRemarks);
@@ -350,7 +372,11 @@ const AdminRow = ({ complaint, isSelected, onSelect, onUpdate }) => {
           <div className="admin-cell-category">{complaint.category || 'Uncategorized'}</div>
         </td>
         <td className="status-cell">
-          <div className="custom-status-container">
+          <div 
+            className="custom-status-container"
+            onMouseEnter={() => setPopupOpen(true)}
+            onMouseLeave={() => setPopupOpen(false)}
+          >
             <span 
               className={`interactive-status-badge ${getStatusBadgeClass(complaint.status)}`}
               onClick={() => setPopupOpen(!popupOpen)}
@@ -422,24 +448,37 @@ const AdminRow = ({ complaint, isSelected, onSelect, onUpdate }) => {
           <td colSpan="7">
             <div className="expanded-details-container">
               <div className="expanded-col">
-                <h4>Description</h4>
+                <h4>Description & Attachments</h4>
                 <p>{complaint.description || 'No description provided.'}</p>
-                {complaint.attachment && (
+                {/* Attachments */}
+                {complaint.attachments && complaint.attachments.length > 0 && (
                   <div style={{marginTop: '12px'}}>
-                    <a href={`http://localhost:5000/${complaint.attachment}`} target="_blank" rel="noreferrer" className="attachment-link">
-                      View Attachment
-                    </a>
+                    <strong style={{color: '#334155'}}>Attachments ({complaint.attachments.length}):</strong>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap'}}>
+                      {complaint.attachments.map((att, i) => (
+                        <div key={i} onClick={() => { setPreviewAttachment(att); setAttachmentModalVisible(true); }} style={{border: '1px solid #cbd5e1', padding: '4px', borderRadius: '4px', cursor: 'pointer', background: '#fff', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          {att.type.includes('image') ? <img src={att.url} alt="att" style={{width: '30px', height: '30px', objectFit: 'cover'}} /> : <PaperClipOutlined />}
+                          <span style={{fontSize: '0.8rem', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{att.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
-              <div className="expanded-col">
-                <h4>Admin Remarks</h4>
-                <div className="remarks-history">
-                  {complaint.remarks ? (
-                    <div className="remark-bubble">
-                      <MessageOutlined className="remark-icon" /> <span>{complaint.remarks}</span>
+              <div className="expanded-col" style={{flex: 1.5}}>
+                <h4>Discussion / Comments</h4>
+                <div style={{maxHeight: '150px', overflowY: 'auto', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                  {(!complaint.comments || complaint.comments.length === 0) && <div style={{color: '#94a3b8', fontSize: '0.85rem'}}>No comments yet.</div>}
+                  {complaint.comments && complaint.comments.map((cm, i) => (
+                    <div key={i} style={{alignSelf: cm.sender === 'Admin' ? 'flex-end' : 'flex-start', background: cm.sender === 'Admin' ? '#dcfce7' : '#f1f5f9', padding: '8px 12px', borderRadius: '8px', maxWidth: '80%'}}>
+                      <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '4px', fontWeight: 'bold'}}>{cm.sender} <span style={{fontWeight: 'normal'}}>{new Date(cm.date).toLocaleString()}</span></div>
+                      <div>{cm.text}</div>
                     </div>
-                  ) : <span className="no-remarks">No remarks added yet.</span>}
+                  ))}
+                </div>
+                <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                  <Input placeholder="Type a comment..." value={commentText} onChange={e => setCommentText(e.target.value)} onPressEnter={handleAddComment} />
+                  <Button type="primary" icon={<SendOutlined />} onClick={handleAddComment} />
                 </div>
               </div>
               <div className="expanded-col">
@@ -455,6 +494,37 @@ const AdminRow = ({ complaint, isSelected, onSelect, onUpdate }) => {
                 </div>
               </div>
             </div>
+            
+            <Modal
+              title={<span style={{fontWeight: 'bold'}}>Preview Attachment</span>}
+              open={attachmentModalVisible}
+              footer={
+                <Button type="primary" icon={<DownloadOutlined />} onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = previewAttachment?.url;
+                  a.download = previewAttachment?.name;
+                  a.click();
+                }}>
+                  Download
+                </Button>
+              }
+              onCancel={() => setAttachmentModalVisible(false)}
+            >
+              {previewAttachment && (
+                <div style={{textAlign: 'center'}}>
+                  {previewAttachment.type?.includes('image') ? (
+                    <img src={previewAttachment.url} alt="preview" style={{maxWidth: '100%', maxHeight: '400px'}} />
+                  ) : (
+                    <p style={{padding: '40px', background: '#f1f5f9', borderRadius: '8px', fontWeight: 'bold'}}>
+                      {previewAttachment.name} (PDF/Document)
+                    </p>
+                  )}
+                  <div style={{marginTop: '10px', fontSize: '0.85rem', color: '#64748b'}}>
+                    Uploaded by: {previewAttachment.uploadedBy || 'User'}
+                  </div>
+                </div>
+              )}
+            </Modal>
           </td>
         </tr>
       )}

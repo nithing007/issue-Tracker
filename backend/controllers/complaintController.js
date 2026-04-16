@@ -1,7 +1,7 @@
 const Complaint = require('../models/Complaint');
 
 const createComplaint = async (req, res) => {
-  const { title, description, category } = req.body;
+  const { title, description, category, priority, attachments } = req.body;
 
   if (req.user.role !== 'user') {
     return res.status(403).json({ message: 'Access denied' });
@@ -17,6 +17,8 @@ const createComplaint = async (req, res) => {
       title,
       description,
       category,
+      priority: priority || 'Medium',
+      attachments: attachments || [],
       status: 'Pending',
     });
 
@@ -61,7 +63,7 @@ const updateComplaintStatus = async (req, res) => {
     return res.status(403).json({ message: 'Access denied' });
   }
 
-  const { status, remarks } = req.body;
+  const { status, remarks, newComment } = req.body;
 
   try {
     const complaint = await Complaint.findById(req.params.id);
@@ -78,6 +80,10 @@ const updateComplaintStatus = async (req, res) => {
       complaint.remarks = remarks;
     }
 
+    if (newComment) {
+      complaint.comments.push({ ...newComment, sender: 'Admin' });
+    }
+
     await complaint.save();
     res.json(complaint);
   } catch {
@@ -86,7 +92,7 @@ const updateComplaintStatus = async (req, res) => {
 };
 
 const updateComplaint = async (req, res) => {
-  const { title, description, category } = req.body;
+  const { title, description, category, priority, attachments, newComment } = req.body;
 
   try {
     const complaint = await Complaint.findById(req.params.id);
@@ -100,14 +106,21 @@ const updateComplaint = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    // Only allow update if pending
-    if (complaint.status !== 'Pending') {
-      return res.status(400).json({ message: 'Cannot edit complaint once it is processed' });
-    }
+    if (newComment) {
+      // Allow adding a comment regardless of status
+      complaint.comments.push({ ...newComment, sender: 'User' });
+    } else {
+      // Only allow updating original fields if pending
+      if (complaint.status !== 'Pending') {
+        return res.status(400).json({ message: 'Cannot edit complaint once it is processed' });
+      }
 
-    complaint.title = title || complaint.title;
-    complaint.description = description || complaint.description;
-    complaint.category = category || complaint.category;
+      complaint.title = title || complaint.title;
+      complaint.description = description || complaint.description;
+      complaint.category = category || complaint.category;
+      if (priority) complaint.priority = priority;
+      if (attachments) complaint.attachments = attachments;
+    }
 
     await complaint.save();
     res.json(complaint);

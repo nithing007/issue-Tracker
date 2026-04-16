@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 
+const attachmentSchema = new mongoose.Schema({
+  name: String,
+  type: String,
+  url: String,
+  size: Number,
+  uploadedBy: { type: String, default: 'User' },
+  date: { type: Date, default: Date.now }
+});
+
+const commentSchema = new mongoose.Schema({
+  text: String,
+  sender: { type: String, enum: ['User', 'Admin'], default: 'User' },
+  date: { type: Date, default: Date.now },
+  attachments: [attachmentSchema]
+});
+
 const complaintSchema = new mongoose.Schema(
   {
     user: {
@@ -27,6 +43,13 @@ const complaintSchema = new mongoose.Schema(
       enum: ['Pending', 'In Progress', 'Resolved', 'Rejected'],
       default: 'Pending',
     },
+    priority: {
+      type: String,
+      enum: ['Low', 'Medium', 'High'],
+      default: 'Medium',
+    },
+    attachments: [attachmentSchema],
+    comments: [commentSchema],
     remarks: {
       type: String,
       default: '',

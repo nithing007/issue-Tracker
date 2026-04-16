@@ -207,7 +207,7 @@
 
 /* Table */
 .admin-table-wrapper {
-  overflow-x: auto;
+  overflow: visible;
 }
 .admin-interactive-table {
   width: 100%;
@@ -230,10 +230,14 @@
 }
 .admin-table-row {
   transition: background-color 0.2s;
+  position: relative;
 }
-.admin-table-row:hover { background-color: #f8fafc; }
+.admin-table-row:hover { 
+  background-color: #f8fafc;
+  z-index: 50; 
+}
 .admin-table-row.row-high-priority { background-color: #fffafa; }
-.admin-table-row.row-high-priority:hover { background-color: #fef2f2; }
+.admin-table-row.row-high-priority:hover { background-color: #fef2f2; z-index: 50; }
 
 /* Cells */
 .admin-cell-title { font-weight: 600; color: #1e293b; margin-bottom: 4px; }
@@ -287,17 +291,27 @@
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 8px;
+  transform: translateY(8px);
   background: white;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   border: 1px solid #e2e8f0;
   padding: 16px;
-  z-index: 50;
+  z-index: 9999;
   min-width: 220px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  transition: all 0.2s ease;
+}
+.status-inline-popup::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: transparent;
 }
 .popup-select, .popup-input {
   width: 100%;
