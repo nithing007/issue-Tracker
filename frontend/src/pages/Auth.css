@@ -22,7 +22,7 @@
 .modern-auth-wrapper {
   position: relative;
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -221,4 +221,34 @@
 .modern-google-button img {
   width: 18px;
   height: 18px;
+}
+.modern-auth-header-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modern-auth-header-logo img {
+  height: 60px;
+  margin-bottom: 5px;
+}
+
+.modern-auth-header-logo h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #003a8c 0%, #ff8c00 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: block;
 }

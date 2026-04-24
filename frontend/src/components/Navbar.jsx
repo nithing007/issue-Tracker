@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MailOutlined, UserOutlined, DashboardOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Avatar, Dropdown, Space, Typography } from 'antd';
+import CustomAvatar from './Avatar';
+import { Dropdown, Space, Typography, Badge, Avatar as AntAvatar } from 'antd';
 import { useUser } from '../context/UserContext';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -51,18 +53,9 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            background: '#1890ff',
-            borderRadius: '8px',
-            padding: '8px 10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <MailOutlined style={{ fontSize: '24px', color: 'white' }} />
-          </div>
-          <h1>Complaint Tracker</h1>
+        <div className="brand" onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
+          <img src="/assets/trackease-logo.png" alt="TrackEase Pro" className="brand-logo" />
+          <span className="brand-text">TrackEase Pro</span>
         </div>
         <ul className="nav-links">
           {!token ? (
@@ -100,6 +93,9 @@ const Navbar = () => {
                 </button>
               </li>
               <li>
+                <NotificationBell />
+              </li>
+              <li>
                 <Dropdown 
                   menu={{ 
                     items: menuItems, 
@@ -120,11 +116,11 @@ const Navbar = () => {
                       paddingLeft: '12px' 
                     }}
                   >
-                    <Avatar 
-                      src={displayProfilePicture}
-                      icon={!displayProfilePicture && <UserOutlined />} 
-                      style={{ backgroundColor: '#e6f7ff', color: '#1890ff' }} 
-                    />
+                    {displayProfilePicture ? (
+                      <AntAvatar src={displayProfilePicture} />
+                    ) : (
+                      <CustomAvatar name={userName} size="32px" fontSize="0.85rem" />
+                    )}
                     <Typography.Text style={{ fontWeight: 500, fontSize: '15px', color: '#333' }}>
                       {userName}
                     </Typography.Text>

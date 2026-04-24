@@ -9,7 +9,11 @@ import {
     SyncOutlined,
     CheckCircleOutlined,
     CloseCircleOutlined,
-    AppstoreOutlined
+    AppstoreOutlined,
+    SolutionOutlined,
+    LockOutlined,
+    SmileOutlined,
+    RocketOutlined
 } from '@ant-design/icons';
 
 const { Content } = Layout;
@@ -105,7 +109,7 @@ const Home = () => {
     ];
 
     return (
-        <Layout style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+        <Layout style={{ minHeight: '100vh', background: '#f8faff' }}>
             <Navbar />
 
             <Content style={{
@@ -118,78 +122,94 @@ const Home = () => {
                 <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
 
                 {/* Hero Section */}
-                <div style={{
-                    textAlign: 'center',
+                <div className="hero-container" style={{
                     marginBottom: '80px',
-                    padding: '80px 20px',
-                    background: 'linear-gradient(180deg, #e6f7ff 0%, #ffffff 100%)',
+                    padding: '60px 48px',
+                    background: '#f0f7ff',
                     borderRadius: '24px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+                    gap: '40px',
+                    flexWrap: 'nowrap',
+                    width: '100%'
                 }}>
-                    <Space direction="vertical" size="large">
-                        <Title level={1} style={{ margin: 0, fontWeight: 700, color: '#003a8c' }}>
-                            Manage complaints efficiently
-                        </Title>
-                        <Paragraph style={{ fontSize: '18px', color: '#595959', maxWidth: '700px', margin: '0 auto' }}>
-                            Track, update, and resolve technical issues faster with our streamlined complaint management system.
-                        </Paragraph>
-                        <Space size="middle" style={{ marginTop: '20px' }}>
-                            <Link to="/raise-complaint">
-                                <Button type="primary" size="large" icon={<PlusOutlined />} shape="round" style={{ height: '48px', padding: '0 32px', fontSize: '16px' }}>
-                                    Raise Complaint
-                                </Button>
-                            </Link>
-                            <Link to="/user-panel">
-                                <Button size="large" icon={<DashboardOutlined />} shape="round" style={{ height: '48px', padding: '0 32px', fontSize: '16px' }}>
-                                    View Dashboard
-                                </Button>
-                            </Link>
+                    <div style={{ flex: '1 1 500px', textAlign: 'left' }}>
+                        <Space direction="vertical" size="large">
+                            <Title level={1} style={{ margin: 0, fontWeight: 800, color: '#003a8c', fontSize: '48px', lineHeight: 1.2 }}>
+                                Manage complaints efficiently with your <span style={{ color: '#1890ff' }}>Support Team</span>
+                            </Title>
+                            <Paragraph style={{ fontSize: '19px', color: '#595959', maxWidth: '600px', lineHeight: 1.6 }}>
+                                The modern SaaS platform to track, update, and resolve technical issues faster than ever with real-time transparency.
+                            </Paragraph>
+                            <Space size="middle" style={{ marginTop: '20px' }}>
+                                <Link to="/raise-complaint">
+                                    <Button type="primary" size="large" icon={<PlusOutlined />} shape="round" style={{ height: '54px', padding: '0 40px', fontSize: '17px', background: '#1890ff', border: 'none', boxShadow: '0 4px 14px 0 rgba(24,144,255,0.39)' }}>
+                                        Raise Complaint
+                                    </Button>
+                                </Link>
+                                <Link to="/user-panel">
+                                    <Button size="large" icon={<DashboardOutlined />} shape="round" style={{ height: '54px', padding: '0 40px', fontSize: '17px', border: '2px solid #e6f7ff', color: '#003a8c', fontWeight: '500' }}>
+                                        View Dashboard
+                                    </Button>
+                                </Link>
+                            </Space>
                         </Space>
-                    </Space>
+                    </div>
+                    <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <img src="/assets/trackease-logo.png" alt="TrackEase Pro" className="hero-logo" />
+                    </div>
+
                 </div>
 
-                {/* Statistics Section */}
-                <Row gutter={[24, 24]} justify="center">
-                    {statCards.map((stat, index) => (
-                        <Col key={index} xs={24} sm={12} md={8} lg={4} style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Card
-                                bordered={false}
-                                hoverable
-                                style={{
-                                    borderRadius: '16px',
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                                    height: '100%',
-                                    width: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.3s ease'
-                                }}
-                                bodyStyle={{ padding: '24px', textAlign: 'center' }}
-                            >
-                                <div style={{
-                                    width: '64px',
-                                    height: '64px',
-                                    background: stat.bg,
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto 16px',
-                                    color: stat.color,
-                                    fontSize: '28px'
-                                }}>
-                                    {stat.icon}
-                                </div>
-                                <Statistic
-                                    title={<Text type="secondary" style={{ fontSize: '16px' }}>{stat.title}</Text>}
-                                    value={stat.value}
-                                    valueStyle={{ fontWeight: 700, fontSize: '32px', color: '#262626' }}
-                                />
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
+                {/* New Feature Cards Section */}
+                <div style={{ marginBottom: '64px' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                        <Title level={2} style={{ fontWeight: 800, color: '#003a8c', marginBottom: '16px' }}>Why Choose TrackEase Pro?</Title>
+                        <Paragraph style={{ color: '#64748b', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
+                            Our platform is designed to make complaint management seamless, secure, and transparent for everyone.
+                        </Paragraph>
+                    </div>
+                    <Row gutter={[32, 32]}>
+                        {[
+                            { title: 'Smart Issue Management', desc: 'Efficiently track, update, and resolve complaints', icon: <SolutionOutlined />, color: '#1890ff' },
+                            { title: 'Real-time Updates', desc: 'Live status tracking with instant updates', icon: <SyncOutlined />, color: '#52c41a' },
+                            { title: 'Secure & Reliable', desc: 'Role-based access and secure data handling', icon: <LockOutlined />, color: '#722ed1' },
+                            { title: 'User-Friendly Interface', desc: 'Clean, intuitive dashboard for better usability', icon: <SmileOutlined />, color: '#faad14' }
+                        ].map((feature, i) => (
+                            <Col key={i} xs={24} sm={12} lg={6}>
+                                <Card
+                                    hoverable
+                                    bordered={false}
+                                    style={{
+                                        borderRadius: '20px',
+                                        height: '100%',
+                                        textAlign: 'center',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
+                                    }}
+                                    bodyStyle={{ padding: '40px 24px' }}
+                                >
+                                    <div style={{
+                                        fontSize: '40px',
+                                        color: feature.color,
+                                        marginBottom: '24px',
+                                        height: '80px',
+                                        width: '80px',
+                                        background: `${feature.color}15`,
+                                        borderRadius: '20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        margin: '0 auto 24px'
+                                    }}>
+                                        {feature.icon}
+                                    </div>
+                                    <Title level={4} style={{ marginBottom: '16px', color: '#1e293b' }}>{feature.title}</Title>
+                                    <Paragraph style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>{feature.desc}</Paragraph>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                </div>
 
                 {/* About Issue Tracker Section */}
                 <div style={{
@@ -301,7 +321,7 @@ const Home = () => {
                     borderTop: '1px solid #f0f0f0'
                 }}>
                     <Text type="secondary" style={{ fontSize: '13px' }}>
-                        © 2026 Issue Tracker. All rights reserved.
+                        © 2026 TrackEase Pro. All rights reserved.
                     </Text>
                 </div>
 

@@ -7,6 +7,8 @@ import UserPanel from './pages/UserPanel';
 import AdminPanel from './pages/AdminPanel';
 import RaiseComplaint from './pages/RaiseComplaint';
 import Profile from './pages/Profile';
+import ChangePassword from './pages/ChangePassword';
+import ForgotPassword from './pages/ForgotPassword';
 
 // Reusable Route Guard Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -27,6 +29,7 @@ const App = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route
           path="/home"
@@ -60,6 +63,15 @@ const App = () => {
           element={
             <ProtectedRoute allowedRoles={['user', 'student', 'admin']}>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute allowedRoles={['user', 'student', 'admin']}>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

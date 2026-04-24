@@ -77,7 +77,12 @@ const ComplaintForm = () => {
                 setPriority('Medium');
                 setAttachments([]);
                 setIsSuccess(true);
-                setMessageText('Complaint submitted successfully. Estimated resolution: 2-3 days.');
+                setMessageText('Complaint submitted successfully. Redirecting to dashboard...');
+                
+                // Redirect after success
+                setTimeout(() => {
+                    navigate('/user-panel');
+                }, 2000);
             } else {
                 setMessageText('Complaint submission failed');
             }

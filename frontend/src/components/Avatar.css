@@ -1,0 +1,13 @@
+.default-avatar {
+  background: linear-gradient(135deg, #4da3ff, #6290e8);
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+  box-shadow: 0 4px 10px rgba(77, 163, 255, 0.3);
+  text-transform: uppercase;
+}

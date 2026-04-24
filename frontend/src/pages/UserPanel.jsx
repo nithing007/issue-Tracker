@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Input, Select, Tooltip, Empty, Modal, Form, message, Popconfirm, Button } from 'antd';
+import { Input, Select, Tooltip, Empty, Modal, Form, message, Popconfirm, Button, Spin } from 'antd';
 import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, PaperClipOutlined, DownloadOutlined, SendOutlined } from '@ant-design/icons';
 import Navbar from '../components/Navbar';
+import { useSocket } from '../context/SocketContext';
 import './Dashboard.css';
 
 const UserPanel = () => {
   const [complaints, setComplaints] = useState([]);
+  const socket = useSocket();
   const [statusMsg, setStatusMsg] = useState('');
+  
+  // Defensive check for complaints array
+  const safeComplaints = Array.isArray(complaints) ? complaints : [];
   const [timeRange, setTimeRange] = useState('All Time');
   const [expandedRowKeys, setExpandedRowKeys] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +43,43 @@ const UserPanel = () => {
   };
 
   useEffect(() => {
+    if (socket) {
+      socket.on('status_update', (data) => {
+        setComplaints(prev => prev.map(c => c._id === data.id ? { ...c, status: data.status } : c));
+        message.info(`Status of complaint #${data.id.slice(-6)} updated to ${data.status}`);
+      });
+
+      socket.on('receive_message', (data) => {
+        setComplaints(prev => prev.map(c => {
+          if (c._id === data.roomId) {
+            // Check if comment already exists
+            const exists = c.comments.some(cm => cm.date === data.comment.date && cm.text === data.comment.text);
+            if (!exists) {
+              return { ...c, comments: [...c.comments, data.comment] };
+            }
+          }
+          return c;
+        }));
+      });
+
+      return () => {
+        socket.off('status_update');
+        socket.off('receive_message');
+      };
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket && safeComplaints.length > 0) {
+      safeComplaints.forEach(c => {
+        if (c?._id) {
+          socket.emit('join_room', c._id.toString());
+        }
+      });
+    }
+  }, [socket, safeComplaints.length]);
+
+  useEffect(() => {
     if (!token || !(role === 'user' || role === 'student')) {
       navigate('/login');
       return;
@@ -46,6 +88,7 @@ const UserPanel = () => {
   }, [token, role, navigate]);
 
   const fetchComplaints = async () => {
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/complaints/my', {
         headers: {
@@ -66,7 +109,10 @@ const UserPanel = () => {
         setStatusMsg('Failed to load complaints');
       }
     } catch (error) {
+      console.error('Fetch error:', error);
       setStatusMsg('Unable to load complaints');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,10 +184,10 @@ const UserPanel = () => {
     }
   };
 
-  const total = complaints.length;
-  const resolved = complaints.filter(c => c.status === 'Resolved' || c.status?.toLowerCase() === 'resolved').length;
-  const inProgress = complaints.filter(c => c.status === 'In Progress' || c.status?.toLowerCase().includes('progress')).length;
-  const rejected = complaints.filter(c => c.status === 'Rejected' || c.status?.toLowerCase() === 'rejected').length;
+  const total = safeComplaints.length;
+  const resolved = safeComplaints.filter(c => c?.status === 'Resolved' || c?.status?.toLowerCase() === 'resolved').length;
+  const inProgress = safeComplaints.filter(c => c?.status === 'In Progress' || c?.status?.toLowerCase()?.includes('progress')).length;
+  const rejected = safeComplaints.filter(c => c?.status === 'Rejected' || c?.status?.toLowerCase() === 'rejected').length;
 
   const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
@@ -161,16 +207,17 @@ const UserPanel = () => {
   };
 
   const handleDownload = (complaint) => {
+    if (!complaint) return;
     const content = `COMPLAINT DETAILS
 --------------------
-Title: ${complaint.title}
-Category: ${complaint.category}
+Title: ${complaint.title || 'N/A'}
+Category: ${complaint.category || 'N/A'}
 Priority: ${complaint.priority || 'Medium'}
-Status: ${complaint.status}
-Date: ${new Date(complaint.createdAt).toLocaleDateString()}
+Status: ${complaint.status || 'Pending'}
+Date: ${complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'N/A'}
 
 Description:
-${complaint.description}
+${complaint.description || 'No description'}
 
 Estimated Resolution: 2-3 days
 ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
@@ -179,13 +226,13 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Complaint_${complaint.title.substring(0, 10)}.txt`;
+    a.download = `Complaint_${(complaint.title || 'detail').substring(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const handleCommentFileChange = (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []);
     files.forEach(file => {
         if (file.size > 5 * 1024 * 1024) return;
         const reader = new FileReader();
@@ -226,14 +273,13 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
       message.error('Failed to add comment');
     }
   };
-
-  // Filter complaints based on timeRange
   const now = new Date();
   const getFilteredComplaints = () => {
-    let result = complaints;
+    let result = safeComplaints;
     
     if (timeRange !== 'All Time') {
       result = result.filter(c => {
+        if (!c?.createdAt) return false;
         const createdAt = new Date(c.createdAt);
         const diffTime = Math.abs(now - createdAt);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -243,30 +289,31 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
       });
     }
 
-    if (searchQuery) result = result.filter(c => c.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (searchQuery) result = result.filter(c => c?.title?.toLowerCase()?.includes(searchQuery.toLowerCase()));
     
     if (statusFilter !== 'All') {
-      if (statusFilter === 'Pending') result = result.filter(c => c.status?.toLowerCase() === 'pending');
-      else if (statusFilter === 'In Progress') result = result.filter(c => c.status?.toLowerCase().includes('progress'));
-      else if (statusFilter === 'Resolved') result = result.filter(c => c.status?.toLowerCase().includes('resolved'));
-      else if (statusFilter === 'Rejected') result = result.filter(c => c.status?.toLowerCase() === 'rejected');
+      if (statusFilter === 'Pending') result = result.filter(c => c?.status?.toLowerCase() === 'pending');
+      else if (statusFilter === 'In Progress') result = result.filter(c => c?.status?.toLowerCase()?.includes('progress'));
+      else if (statusFilter === 'Resolved') result = result.filter(c => c?.status?.toLowerCase()?.includes('resolved'));
+      else if (statusFilter === 'Rejected') result = result.filter(c => c?.status?.toLowerCase() === 'rejected');
     }
 
-    if (categoryFilter !== 'All') result = result.filter(c => (c.category || 'General') === categoryFilter);
-    if (priorityFilter !== 'All') result = result.filter(c => (c.priority || 'Medium') === priorityFilter);
+    if (categoryFilter !== 'All') result = result.filter(c => (c?.category || 'General') === categoryFilter);
+    if (priorityFilter !== 'All') result = result.filter(c => (c?.priority || 'Medium') === priorityFilter);
 
     return result;
   };
 
   const filteredComplaints = getFilteredComplaints();
-  const categories = ['All', ...new Set(complaints.map(c => c.category || 'General'))];
+  const categories = ['All', ...new Set(safeComplaints.map(c => c?.category || 'General'))];
 
   return (
-    <div className="modern-dashboard-bg">
+    <div className="dashboard-root-wrapper">
+      <div className="modern-dashboard-bg">
       <Navbar />
       
       <div className="modern-dashboard-header">
-        <h1>Student Dashboard</h1>
+        <h1>TrackEase Pro Dashboard</h1>
         <p>Track and monitor your complaints with ease.</p>
       </div>
 
@@ -278,12 +325,12 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
           <div className="stat-pill blue-pill hover-lift">
             <span className="pill-icon">📋</span>
             <span className="pill-label">Today Complaints</span>
-            <span className="pill-value">{complaints.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString()).length}</span>
+            <span className="pill-value">{safeComplaints.filter(c => c?.createdAt && new Date(c.createdAt).toDateString() === new Date().toDateString()).length}</span>
           </div>
           <div className="stat-pill orange-pill hover-lift">
             <span className="pill-icon">⏳</span>
             <span className="pill-label">Pending Today</span>
-            <span className="pill-value">{complaints.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString() && (c.status?.toLowerCase().includes('progress') || c.status?.toLowerCase() === 'pending')).length}</span>
+            <span className="pill-value">{safeComplaints.filter(c => c?.createdAt && new Date(c.createdAt).toDateString() === new Date().toDateString() && (c.status?.toLowerCase()?.includes('progress') || c.status?.toLowerCase() === 'pending')).length}</span>
           </div>
         </div>
 
@@ -361,7 +408,13 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
                 </tr>
               </thead>
               <tbody>
-                {filteredComplaints.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" style={{textAlign: 'center', padding: '50px 0'}}>
+                      <Spin size="large" tip="Loading complaints..." />
+                    </td>
+                  </tr>
+                ) : filteredComplaints.length > 0 ? (
                   filteredComplaints.map((c) => {
                     const date = new Date(c.createdAt);
                     const isExpanded = expandedRowKeys[c._id];
@@ -477,223 +530,130 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
           </div>
         </div>
 
-        {/* Lower Grid area */}
-        <div className="dashboard-grid-lower">
+        {/* Enhanced Lower Grid Area */}
+        <div className="dashboard-grid-lower" style={{marginTop: '32px'}}>
           
-          {/* LEFT COLUMN */}
-          <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
-            
-            {/* Alert Box */}
-            <div className="notification-alert">
-              <InfoCircleOutlined className="alert-icon" />
-              <div className="alert-content">
-                <div className="alert-text">2 complaints pending more than 3 days</div>
-                <div className="alert-text">1 complaint awaiting admin response</div>
-              </div>
+          {/* TOP ROW: Quick Insights Cards */}
+          <div style={{gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '8px'}}>
+            <div className="dashboard-card hover-lift" style={{padding: '20px', textAlign: 'center', borderTop: '4px solid #3b82f6'}}>
+               <div style={{fontSize: '2rem', marginBottom: '8px'}}>📊</div>
+               <div style={{color: '#64748b', fontWeight: '500', marginBottom: '4px'}}>Total Complaints</div>
+               <div style={{fontSize: '1.75rem', fontWeight: '700', color: '#1e293b'}}>{total}</div>
             </div>
-
-            {/* Complaint Summary */}
-            <div className="dashboard-card hover-lift">
-              <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>Complaint Summary</h2>
-              
-              <div className="summary-blocks">
-                <div className="summary-block total hover-lift-subtle">
-                  <div className="summary-icon">📋</div>
-                  <div className="summary-label">Total</div>
-                  <div className="summary-value">{total}</div>
-                  <div className="summary-trend"><span>+2</span> this week</div>
-                </div>
-                <div className="summary-block resolved hover-lift-subtle">
-                  <div className="summary-icon">✅</div>
-                  <div className="summary-label">Resolved</div>
-                  <div className="summary-value">{resolved}</div>
-                  <div className="summary-trend positive"><span>+1</span> this week</div>
-                </div>
-                <div className="summary-block in-progress hover-lift-subtle">
-                  <div className="summary-icon">⏳</div>
-                  <div className="summary-label">In Progress</div>
-                  <div className="summary-value">{inProgress}</div>
-                  <div className="summary-trend warning"><span>-1</span> pending</div>
-                </div>
-                <div className="summary-block rejected hover-lift-subtle">
-                  <div className="summary-icon">❌</div>
-                  <div className="summary-label">Rejected</div>
-                  <div className="summary-value">{rejected}</div>
-                  <div className="summary-trend negative"><span>0</span> this week</div>
-                </div>
-              </div>
-
-              <div className="resolution-rate-container">
-                <div className="resolution-rate">Resolution Rate: {resolutionRate}%</div>
-                <div className="resolution-trend positive">+2% vs last month</div>
-              </div>
-              <div className="progress-bar-container" style={{marginBottom: '10px'}}>
-                <div className="progress-bar-fill" style={{width: `${resolutionRate}%`}}></div>
-              </div>
-              <div style={{fontSize: '0.85rem', color: '#64748b', textAlign: 'center'}}>
-                Resolution rate improved by 10% this week.
-              </div>
+            <div className="dashboard-card hover-lift" style={{padding: '20px', textAlign: 'center', borderTop: '4px solid #f59e0b'}}>
+               <div style={{fontSize: '2rem', marginBottom: '8px'}}>⏳</div>
+               <div style={{color: '#64748b', fontWeight: '500', marginBottom: '4px'}}>In Progress</div>
+               <div style={{fontSize: '1.75rem', fontWeight: '700', color: '#1e293b'}}>{inProgress}</div>
             </div>
-
-            {/* Recent Updates */}
-            <div className="dashboard-card hover-lift">
-              <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>
-                <span style={{marginRight: '8px'}}>🕒</span> Recent Updates
-              </h2>
-              
-              <div className="updates-timeline">
-                {complaints.slice(0, 3).map((c, i) => (
-                  <div className="update-item" key={c._id || i}>
-                    <div className={`update-dot ${
-                        c.status?.toLowerCase().includes('resolved') ? 'resolved' :
-                        c.status?.toLowerCase().includes('progress') ? 'in-progress' : 'rejected'
-                    }`}></div>
-                    <div className="update-content">
-                      <p>Your complaint "{c.title}" is currently {c.status?.toLowerCase()}.</p>
-                      <div className="update-time">{new Date(c.createdAt).toLocaleString('en-US', {month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</div>
-                    </div>
-                  </div>
-                ))}
-                
-                {complaints.length === 0 && (
-                  <div style={{color: '#94a3b8', fontSize: '0.9rem'}}>No recent updates.</div>
-                )}
-              </div>
-              
-              <a href="#my-complaints" className="view-all-link">View All Complaints &rarr;</a>
+            <div className="dashboard-card hover-lift" style={{padding: '20px', textAlign: 'center', borderTop: '4px solid #22c55e'}}>
+               <div style={{fontSize: '2rem', marginBottom: '8px'}}>✅</div>
+               <div style={{color: '#64748b', fontWeight: '500', marginBottom: '4px'}}>Resolved</div>
+               <div style={{fontSize: '1.75rem', fontWeight: '700', color: '#1e293b'}}>{resolved}</div>
             </div>
-            
+            <div className="dashboard-card hover-lift" style={{padding: '20px', textAlign: 'center', borderTop: '4px solid #8b5cf6'}}>
+               <div style={{fontSize: '2rem', marginBottom: '8px'}}>⚡</div>
+               <div style={{color: '#64748b', fontWeight: '500', marginBottom: '4px'}}>Response Time</div>
+               <div style={{fontSize: '1.75rem', fontWeight: '700', color: '#1e293b'}}>~24h</div>
+            </div>
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
-            
-            {/* Complaints Overview Chart */}
-            <div className="dashboard-card hover-lift">
-              <div className="graph-header-controls">
-                <h2 className="dashboard-card-title">Complaints Overview</h2>
-                <div className="graph-controls-right">
-                  <div className="graph-toggles">
-                    <button className={`graph-toggle ${graphMode === 'count' ? 'active' : ''}`} onClick={() => setGraphMode('count')}>
-                      Complaints Count
-                    </button>
-                    <button className={`graph-toggle ${graphMode === 'distribution' ? 'active' : ''}`} onClick={() => setGraphMode('distribution')}>
-                      Status Dist.
-                    </button>
+          {/* LEFT COLUMN: Recent Activity Panel */}
+          <div className="dashboard-card hover-lift" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+            <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>
+              <SyncOutlined style={{marginRight: '8px', color: '#3b82f6'}} /> Recent Activity
+            </h2>
+            <div className="updates-timeline" style={{flex: 1}}>
+              {safeComplaints.slice(0, 5).map((c, i) => {
+                const isResolved = c?.status?.toLowerCase()?.includes('resolved');
+                const hasAdminReply = c?.comments?.some(cm => cm.sender === 'Admin');
+                return (
+                  <div className="update-item" key={c?._id || i}>
+                    <div className={`update-dot ${isResolved ? 'resolved' : 'in-progress'}`}></div>
+                    <div className="update-content">
+                      <p style={{margin: 0, fontWeight: '500', color: '#334155'}}>
+                        {hasAdminReply ? "Admin replied to" : "Action on"} "{c?.title}"
+                      </p>
+                      <p style={{margin: '2px 0 6px 0', fontSize: '0.85rem', color: '#64748b'}}>
+                        Status is now <strong style={{color: isResolved ? '#22c55e' : '#f59e0b'}}>{c?.status}</strong>
+                      </p>
+                      <div className="update-time" style={{fontSize: '0.75rem', opacity: 0.7}}>
+                        {c?.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'N/A'}
+                      </div>
+                    </div>
                   </div>
-                  <Select 
-                    value={timeRange} 
-                    onChange={value => setTimeRange(value)}
-                    size="small"
-                    style={{ width: 100 }}
-                    options={[
-                      { value: '10 Days', label: '10 Days' },
-                      { value: 'A Month', label: 'A Month' },
-                      { value: 'All Time', label: 'All Time' }
-                    ]}
-                  />
-                </div>
-              </div>
-              
-              <div style={{display: 'flex', justifyContent: 'flex-end', gap: '12px', fontSize: '0.75rem', fontWeight: '600', margin: '0 0 10px 0'}}>
-                <span style={{color: '#22c55e'}}>⬜ Resolved</span>
-                <span style={{color: '#f59e0b'}}>⬜ In Progress</span>
-                <span style={{color: '#ef4444'}}>⬜ Rejected</span>
-              </div>
-              
-              {/* Static SVG Chart exactly matching user Mock */}
-              <div className="chart-container">
-                <div className="chart-axis-y">
-                  <span>3</span><span>2</span><span>1</span><span>0</span>
-                </div>
-                <div className="chart-svg-wrapper">
-                  <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="grad-resolved" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#22c55e" stopOpacity="0.2"/>
-                        <stop offset="100%" stopColor="#22c55e" stopOpacity="0"/>
-                      </linearGradient>
-                      <linearGradient id="grad-progress" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.2"/>
-                        <stop offset="100%" stopColor="#f59e0b" stopOpacity="0"/>
-                      </linearGradient>
-                      <linearGradient id="grad-rejected" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#ef4444" stopOpacity="0.2"/>
-                        <stop offset="100%" stopColor="#ef4444" stopOpacity="0"/>
-                      </linearGradient>
-                    </defs>
+                );
+              })}
+              {safeComplaints.length === 0 && <div style={{textAlign: 'center', padding: '20px', color: '#94a3b8'}}>No activity yet</div>}
+            </div>
+          </div>
 
-                    {/* BG Fills */}
-                    <path d="M0,133 L200,133 L400,0 L400,200 L0,200 Z" fill="url(#grad-resolved)" />
-                    <path d="M0,200 L200,133 L400,133 L400,200 L0,200 Z" fill="url(#grad-progress)" />
-                    <path d="M0,200 L200,200 L400,133 L400,200 L0,200 Z" fill="url(#grad-rejected)" />
+          {/* RIGHT COLUMN: Pending Actions & Alerts */}
+          <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
+            <div className="dashboard-card hover-lift" style={{background: '#fff7ed', border: '1px solid #ffedd5'}}>
+              <h2 className="dashboard-card-title" style={{color: '#c2410c', marginBottom: '16px'}}>
+                <InfoCircleOutlined style={{marginRight: '8px'}} /> Pending Actions / Alerts
+              </h2>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                {safeComplaints.filter(c => {
+                  const days = Math.floor((new Date() - new Date(c.createdAt)) / (1000 * 60 * 60 * 24));
+                  return days > 3 && c.status === 'Pending';
+                }).length > 0 && (
+                  <div style={{display: 'flex', gap: '12px', padding: '12px', background: '#fee2e2', borderRadius: '8px', borderLeft: '4px solid #ef4444'}}>
+                    <span style={{fontSize: '1.2rem'}}>⚠️</span>
+                    <div>
+                      <div style={{fontWeight: '600', color: '#b91c1c'}}>Attention Required</div>
+                      <div style={{fontSize: '0.85rem', color: '#7f1d1d'}}>{safeComplaints.filter(c => Math.floor((new Date() - new Date(c.createdAt)) / (1000 * 60 * 60 * 24)) > 3 && c.status === 'Pending').length} complaints pending &gt; 3 days</div>
+                    </div>
+                  </div>
+                )}
+                
+                <div style={{display: 'flex', gap: '12px', padding: '12px', background: '#dbeafe', borderRadius: '8px', borderLeft: '4px solid #3b82f6'}}>
+                  <span style={{fontSize: '1.2rem'}}>💬</span>
+                  <div>
+                    <div style={{fontWeight: '600', color: '#1e3a8a'}}>Waiting for Response</div>
+                    <div style={{fontSize: '0.85rem', color: '#1e3a8a'}}>{safeComplaints.filter(c => c.comments && c.comments.length > 0 && c.comments[c.comments.length-1].sender === 'Admin').length} awaiting your action</div>
+                  </div>
+                </div>
 
-                    {/* Lines */}
-                    <polyline points="0,133 200,133 400,0" fill="none" stroke="#22c55e" strokeWidth="2" />
-                    <polyline points="0,200 200,133 400,133" fill="none" stroke="#f59e0b" strokeWidth="2" />
-                    <polyline points="0,200 200,200 400,133" fill="none" stroke="#ef4444" strokeWidth="2" />
-                    
-                    {/* Points */}
-                    {/* Resolved */}
-                    <circle cx="0" cy="133" r="4" fill="white" stroke="#22c55e" strokeWidth="2" />
-                    <circle cx="200" cy="133" r="4" fill="white" stroke="#22c55e" strokeWidth="2" />
-                    <circle cx="400" cy="0" r="4" fill="white" stroke="#22c55e" strokeWidth="2" />
-                    
-                    {/* In Progress */}
-                    <circle cx="0" cy="200" r="4" fill="white" stroke="#f59e0b" strokeWidth="2" />
-                    <circle cx="200" cy="133" r="4" fill="white" stroke="#f59e0b" strokeWidth="2" />
-                    <circle cx="400" cy="133" r="4" fill="white" stroke="#f59e0b" strokeWidth="2" />
-                    
-                    {/* Rejected */}
-                    <circle cx="0" cy="200" r="4" fill="white" stroke="#ef4444" strokeWidth="2" />
-                    <circle cx="200" cy="200" r="4" fill="white" stroke="#ef4444" strokeWidth="2" />
-                    <circle cx="400" cy="133" r="4" fill="white" stroke="#ef4444" strokeWidth="2" />
-                  </svg>
-                </div>
-                <div className="chart-axis-x" style={{marginLeft: '30px'}}>
-                  <span>10 Days</span>
-                  <span>A Month</span>
-                  <span>All Time</span>
-                </div>
+                {safeComplaints.filter(c => c.status === 'In Progress').length > 0 && (
+                  <div style={{display: 'flex', gap: '12px', padding: '12px', background: '#fef9c3', borderRadius: '8px', borderLeft: '4px solid #eab308'}}>
+                    <span style={{fontSize: '1.2rem'}}>🔄</span>
+                    <div>
+                      <div style={{fontWeight: '600', color: '#854d0e'}}>In Progress</div>
+                      <div style={{fontSize: '0.85rem', color: '#854d0e'}}>{safeComplaints.filter(c => c.status === 'In Progress').length} complaints being addressed</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="dashboard-card hover-lift">
               <h2 className="dashboard-card-title" style={{marginBottom: '20px'}}>
-                <span style={{marginRight: '8px', color: '#f59e0b'}}>⚡</span> Quick Actions
+                <span style={{marginRight: '8px', color: '#f59e0b'}}>⚡</span> Quick Links
               </h2>
-
-              <Link to="/raise-complaint" className="quick-action-btn blue">
-                <div className="qa-left">
-                  <div className="qa-icon-wrapper">➕</div>
-                  <div className="qa-text">
-                    <h4>Raise a New Complaint</h4>
-                    <p>Report a new issue</p>
-                  </div>
-                </div>
-                <div style={{color: '#3b82f6', fontWeight: 'bold'}}>&gt;</div>
-              </Link>
-
-              <a href="#my-complaints" className="quick-action-btn green">
-                <div className="qa-left">
-                  <div className="qa-icon-wrapper">📄</div>
-                  <div className="qa-text">
-                    <h4>View All Complaints</h4>
-                    <p>See all your complaint history</p>
-                  </div>
-                </div>
-                <div style={{color: '#22c55e', fontWeight: 'bold'}}>&gt;</div>
-              </a>
-
+              <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                <Link to="/raise-complaint" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px', textDecoration: 'none', color: '#1e293b'}}>
+                   <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <div style={{width: '32px', height: '32px', background: '#dbeafe', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6'}}>+</div>
+                      <div>Raise New Complaint</div>
+                   </div>
+                   <div style={{fontWeight: 'bold', color: '#94a3b8'}}>&rarr;</div>
+                </Link>
+                <a href="/profile" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px', textDecoration: 'none', color: '#1e293b'}}>
+                   <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <div style={{width: '32px', height: '32px', background: '#dcfce7', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22c55e'}}>👤</div>
+                      <div>View Profile Stats</div>
+                   </div>
+                   <div style={{fontWeight: 'bold', color: '#94a3b8'}}>&rarr;</div>
+                </a>
+              </div>
             </div>
-
           </div>
         </div>
       </div>
 
       <div className="dashboard-footer">
-        &copy; 2026 <strong>Complaint Tracker</strong>. All rights reserved.
+        &copy; 2026 <strong>TrackEase Pro</strong>. All rights reserved.
       </div>
 
        {/* View Modal */}
@@ -836,6 +796,7 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
             </div>
           )}
         </Modal>
+    </div>
     </div>
   );
 };

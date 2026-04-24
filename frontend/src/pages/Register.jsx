@@ -8,6 +8,7 @@ import axios from 'axios';
 const Register = () => {
   const { updateUser } = useUser();
   const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -38,9 +39,50 @@ const Register = () => {
     }
   };
 
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateField = (name, value) => {
+    let errors = { ...fieldErrors };
+    
+    if (name === 'email') {
+      if (!value.toLowerCase().endsWith('@gmail.com')) {
+        errors.email = 'Email must end with @gmail.com';
+      } else {
+        delete errors.email;
+      }
+    } else if (name === 'phoneNumber') {
+      const phoneRegex = /^\+91[0-9]{10}$/;
+      if (!phoneRegex.test(value)) {
+        errors.phoneNumber = 'Must start with +91 followed by 10 digits';
+      } else {
+        delete errors.phoneNumber;
+      }
+    } else if (name === 'password') {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(value)) {
+        errors.password = 'Must have 8+ chars, 1 uppercase, 1 number, 1 special char';
+      } else {
+        delete errors.password;
+      }
+    }
+    
+    setFieldErrors(errors);
+  };
+
+  const handleInputChange = (setter, field) => (e) => {
+    const val = e.target.value;
+    setter(val);
+    validateField(field, val);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (Object.keys(fieldErrors).length > 0) {
+      setError('Please fix the errors before submitting');
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/register', {
@@ -50,6 +92,7 @@ const Register = () => {
           name,
           email,
           password,
+          phoneNumber,
           role: 'user'
         }),
       });
@@ -82,6 +125,10 @@ const Register = () => {
       <div className="modern-auth-wrapper">
         <div className="modern-auth-bg-layer"></div>
         <div className="modern-auth-card">
+          <div className="modern-auth-header-logo">
+            <img src="/assets/trackease-logo.png" alt="TrackEase Pro" />
+            <h1>TrackEase Pro</h1>
+          </div>
           <h2>Register</h2>
           {error && <p className="modern-auth-error">{error}</p>}
           <form onSubmit={handleSubmit}>
@@ -96,24 +143,37 @@ const Register = () => {
               />
             </div>
             <div className="modern-form-group">
+              <label>Phone Number</label>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={handleInputChange(setPhoneNumber, 'phoneNumber')}
+                placeholder="+919876543210"
+                required
+              />
+              {fieldErrors.phoneNumber && <span className="field-error">{fieldErrors.phoneNumber}</span>}
+            </div>
+            <div className="modern-form-group">
               <label>Email</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleInputChange(setEmail, 'email')}
                 placeholder="abc@gmail.com"
                 required
               />
+              {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
             </div>
             <div className="modern-form-group">
               <label>Password</label>
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handleInputChange(setPassword, 'password')}
                 placeholder="••••••••"
                 required
               />
+              {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
             </div>
             <button type="submit" className="modern-auth-button">Register</button>
           </form>
@@ -139,7 +199,7 @@ const Register = () => {
         </div>
       </div>
       <div className="modern-auth-footer">
-        © 2026 <strong>Issue Tracker</strong>. All rights reserved.
+        © 2026 <strong>TrackEase Pro</strong>. All rights reserved.
       </div>
     </div>
   );

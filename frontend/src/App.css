@@ -1,6 +1,39 @@
 /* Global Styles */
 * {
   box-sizing: border-box;
+}.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo {
+  height: 35px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0056b3;
+  white-space: nowrap;
+  letter-spacing: -0.5px;
+}
+
+.hero-logo {
+  height: 420px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  flex-shrink: 0;
+}
+
+
+.hero-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 :root {
@@ -59,7 +92,7 @@ ul {
 .navbar {
   background-color: #e3eff5;
   color: #333;
-  padding: 1rem 2rem;
+  padding: 1.25rem 2.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   width: 100%;
   max-width: 100%;
@@ -72,8 +105,8 @@ ul {
 }
 
 .navbar-container {
-  max-width: 1200px;
-  width: 90%;
+  max-width: 1400px;
+  width: 95%;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;

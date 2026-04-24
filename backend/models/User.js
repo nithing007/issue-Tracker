@@ -27,6 +27,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
+    phoneNumber: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 );

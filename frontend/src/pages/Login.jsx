@@ -97,6 +97,10 @@ const Login = () => {
       <div className="modern-auth-wrapper">
         <div className="modern-auth-bg-layer"></div>
         <div className="modern-auth-card">
+          <div className="modern-auth-header-logo">
+            <img src="/assets/trackease-logo.png" alt="TrackEase Pro" />
+            <h1>TrackEase Pro</h1>
+          </div>
           <h2>Login</h2>
           {error && <p className="modern-auth-error">{error}</p>}
           <form onSubmit={handleSubmit}>
@@ -111,7 +115,10 @@ const Login = () => {
               />
             </div>
             <div className="modern-form-group">
-              <label>Password</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label>Password</label>
+                <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: '#4a75cc', textDecoration: 'none', marginBottom: '6px' }}>Forgot Password?</Link>
+              </div>
               <input
                 type="password"
                 value={password}
@@ -144,7 +151,7 @@ const Login = () => {
         </div>
       </div>
       <div className="modern-auth-footer">
-        © 2026 <strong>Issue Tracker</strong>. All rights reserved.
+        © 2026 <strong>TrackEase Pro</strong>. All rights reserved.
       </div>
     </div>
   );

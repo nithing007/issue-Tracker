@@ -11,9 +11,31 @@ const generateToken = (id, role) => {
 };
 
 const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phoneNumber } = req.body;
 
   try {
+    // Validations
+    if (!name || !email || !password || !phoneNumber) {
+      return res.status(400).json({ message: 'All fields are mandatory' });
+    }
+
+    // Email validation: ends with @gmail.com
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      return res.status(400).json({ message: 'Email must be a valid @gmail.com address' });
+    }
+
+    // Phone validation: +91 followed by 10 digits
+    const phoneRegex = /^\+91[0-9]{10}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return res.status(400).json({ message: 'Phone number must start with +91 followed by 10 digits' });
+    }
+
+    // Password validation: Strong password
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long, include uppercase, number, and special character.' });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
@@ -27,6 +49,7 @@ const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       role: 'user',
+      phoneNumber: phoneNumber,
     });
 
     res.status(201).json({
@@ -37,6 +60,8 @@ const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
         profilePicture: user.profilePicture || '',
+        phoneNumber: user.phoneNumber || '',
+        authProvider: user.authProvider || 'local'
       },
     });
   } catch (error) {
@@ -71,6 +96,8 @@ const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         profilePicture: user.profilePicture || '',
+        phoneNumber: user.phoneNumber || '',
+        authProvider: user.authProvider || 'local'
       },
     });
   } catch (error) {
@@ -91,8 +118,11 @@ const updateProfile = async (req, res) => {
       const profilePicUrl = `http://localhost:5000/uploads/${req.file.filename}`;
       user.profilePicture = profilePicUrl;
     } else if (req.body.profilePicture) {
-        // Fallback for base64 if needed, but we prefer files now
         user.profilePicture = req.body.profilePicture;
+    }
+
+    if (req.body.phoneNumber) {
+      user.phoneNumber = req.body.phoneNumber;
     }
 
     await user.save();
@@ -105,6 +135,7 @@ const updateProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         profilePicture: user.profilePicture,
+        phoneNumber: user.phoneNumber || '',
       },
     });
   } catch (error) {
@@ -140,9 +171,14 @@ const googleLogin = async (req, res) => {
         email,
         role: 'user',
         profilePicture: picture || '',
+        authProvider: 'google',
       });
       console.log('Google auth - new user created:', email);
     } else {
+      if (user.authProvider !== 'google') {
+        user.authProvider = 'google';
+        await user.save();
+      }
       console.log('Google auth - existing user logged in:', email);
     }
 
@@ -154,6 +190,8 @@ const googleLogin = async (req, res) => {
         email: user.email,
         role: user.role,
         profilePicture: user.profilePicture || '',
+        phoneNumber: user.phoneNumber || '',
+        authProvider: user.authProvider || 'google'
       },
     });
   } catch (error) {
@@ -163,9 +201,91 @@ const googleLogin = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.authProvider === 'google') {
+      return res.status(400).json({ message: 'Google accounts cannot change password directly' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Incorrect current password' });
+    }
+
+    // Validate new password strength
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ message: 'New password is not strong enough' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Password update failed' });
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User with this email does not exist' });
+    }
+
+    if (user.authProvider === 'google') {
+      return res.status(400).json({ message: 'Please use Google login for this account' });
+    }
+
+    // Basic implementation: allow direct reset or send a mock link
+    // For this task, we'll allow a simplified reset or just confirm the user exists
+    res.json({ message: 'Reset link sent to your email (Mock)', email });
+  } catch (error) {
+    res.status(500).json({ message: 'Forgot password request failed' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Validate password strength
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters long, include uppercase, number, and special character.' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Password reset failed' });
+    }
+}
+
 module.exports = {
   registerUser,
   loginUser,
   updateProfile,
   googleLogin,
+  changePassword,
+  forgotPassword,
+  resetPassword
 };

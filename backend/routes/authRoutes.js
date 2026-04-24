@@ -2,7 +2,15 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { registerUser, loginUser, updateProfile, googleLogin } = require('../controllers/authController');
+const { 
+  registerUser, 
+  loginUser, 
+  updateProfile, 
+  googleLogin, 
+  changePassword, 
+  forgotPassword, 
+  resetPassword 
+} = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Multer storage configuration
@@ -33,5 +41,8 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/google', googleLogin);
 router.put('/update-profile', protect, upload.single('profilePicture'), updateProfile);
+router.post('/change-password', protect, changePassword);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 module.exports = router;

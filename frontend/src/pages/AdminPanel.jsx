@@ -11,6 +11,8 @@ import {
   PaperClipOutlined, SendOutlined, DownloadOutlined
 } from '@ant-design/icons';
 
+import { useSocket } from '../context/SocketContext';
+
 const getPriority = (complaint) => {
   if (complaint.priority) return complaint.priority;
   if (!complaint._id) return 'Low';
@@ -22,15 +24,52 @@ const getPriority = (complaint) => {
 
 const AdminPanel = () => {
   const [complaints, setComplaints] = useState([]);
+  const socket = useSocket();
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedRows, setSelectedRows] = useState([]);
+  const safeComplaints = Array.isArray(complaints) ? complaints : [];
   
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('receive_message', (data) => {
+        setComplaints(prev => prev.map(c => {
+          if (c._id === data.roomId) {
+            const exists = c.comments.some(cm => cm.date === data.comment.date && cm.text === data.comment.text);
+            if (!exists) {
+              return { ...c, comments: [...c.comments, data.comment] };
+            }
+          }
+          return c;
+        }));
+      });
+
+      socket.on('status_update', (data) => {
+        setComplaints(prev => prev.map(c => c._id === data.id ? { ...c, status: data.status } : c));
+      });
+
+      return () => {
+        socket.off('receive_message');
+        socket.off('status_update');
+      };
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket && safeComplaints.length > 0) {
+      safeComplaints.forEach(c => {
+        if (c?._id) {
+          socket.emit('join_room', c._id.toString());
+        }
+      });
+    }
+  }, [socket, safeComplaints.length]);
 
   useEffect(() => {
     if (!token || role !== 'admin') {
@@ -323,7 +362,7 @@ const AdminRow = ({ complaint, isSelected, onSelect, onUpdate }) => {
       });
       if (response.ok) {
          setCommentText('');
-         window.location.reload(); // Simple refresh to show new comment
+         // No need to reload, socket handles real-time update
       }
     } catch {}
   };

@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createComplaint,
   getMyComplaints,
+  getComplaintCount,
   getAllComplaints,
   updateComplaintStatus,
   updateComplaint,
@@ -13,6 +14,7 @@ const { admin } = require('../middleware/roleMiddleware');
 
 router.post('/', protect, createComplaint);
 router.get('/my', protect, getMyComplaints);
+router.get('/count', protect, getComplaintCount);
 router.get('/all', protect, admin, getAllComplaints);
 router.put('/:id', protect, admin, updateComplaintStatus);
 router.patch('/:id', protect, updateComplaint);

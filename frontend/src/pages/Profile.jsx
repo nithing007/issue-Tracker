@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Layout, Typography, Card, Avatar, Button, Divider, Row, Col, Upload, message } from 'antd';
+import CustomAvatar from '../components/Avatar';
+import { Layout, Typography, Card, Button, Divider, Row, Col, Upload, message, Avatar as AntAvatar } from 'antd';
 import { UserOutlined, DashboardOutlined, LogoutOutlined, NotificationOutlined } from '@ant-design/icons';
 import { useUser } from '../context/UserContext';
 
@@ -12,6 +13,29 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user, profilePicture, updateProfilePicture, logout: contextLogout } = useUser();
   const role = localStorage.getItem('role') || 'user';
+  const [complaintCount, setComplaintCount] = useState(0);
+
+  const displayPhoneNumber = (user?.authProvider === 'google' && (!user?.phoneNumber || user?.phoneNumber === '')) 
+    ? 'Not Provided' 
+    : (user?.phoneNumber || 'Not Provided');
+
+  React.useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/complaints/count', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setComplaintCount(data.count);
+        }
+      } catch (err) {
+        console.error('Failed to fetch count:', err);
+      }
+    };
+    fetchCount();
+  }, []);
 
   const name = user?.name || "User";
   const email = user?.email || "";
@@ -126,19 +150,19 @@ const Profile = () => {
             textAlign: 'center',
             color: 'white'
           }}>
-             <div style={{ position: 'relative', display: 'inline-block', marginBottom: '16px' }}>
-                <Avatar 
-                    size={110} 
-                    src={displayProfilePicture}
-                    icon={!displayProfilePicture && <UserOutlined />} 
-                    style={{ 
-                        backgroundColor: '#82b1ff', 
-                        color: '#002766',
-                        border: '4px solid rgba(255, 255, 255, 0.4)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        fontSize: '48px'
-                    }} 
-                />
+              <div style={{ position: 'relative', display: 'inline-block', marginBottom: '16px' }}>
+                {displayProfilePicture ? (
+                  <AntAvatar 
+                      size={110} 
+                      src={displayProfilePicture}
+                      style={{ 
+                          border: '4px solid rgba(255, 255, 255, 0.4)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      }} 
+                  />
+                ) : (
+                  <CustomAvatar name={name} size="110px" fontSize="3rem" />
+                )}
              </div>
              
              <div style={{ marginBottom: '16px' }}>
@@ -177,6 +201,10 @@ const Profile = () => {
                 <InfoRow label="Full Name" value={name} />
                 <Divider style={{ margin: '0', background: '#f0f0f0' }} />
                 <InfoRow label="Email Address" value={email} />
+                <Divider style={{ margin: '0', background: '#f0f0f0' }} />
+                <InfoRow label="Phone Number" value={displayPhoneNumber} />
+                <Divider style={{ margin: '0', background: '#f0f0f0' }} />
+                <InfoRow label="Total Complaints" value={complaintCount} />
             </div>
 
             <Divider style={{ margin: '40px 0', background: 'transparent' }} />
