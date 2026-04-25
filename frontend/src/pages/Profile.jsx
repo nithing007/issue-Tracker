@@ -96,7 +96,7 @@ const Profile = () => {
   };
 
   const InfoRow = ({ label, value }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0' }}>
+    <div className="profile-info-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0' }}>
       <Text type="secondary" style={{ fontSize: '15px' }}>{label}</Text>
       <Text strong style={{ fontSize: '15px', color: '#262626' }}>{value}</Text>
     </div>
@@ -105,7 +105,7 @@ const Profile = () => {
   return (
     <Layout style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
       <Navbar />
-      <Content style={{
+      <Content className="profile-content" style={{
         padding: '64px 24px',
         maxWidth: '800px',
         margin: '0 auto',
@@ -136,6 +136,7 @@ const Profile = () => {
         <Card 
             bordered={false} 
             bodyStyle={{ padding: 0 }}
+            className="profile-card"
             style={{ 
                 borderRadius: '24px', 
                 overflow: 'hidden',
@@ -144,7 +145,7 @@ const Profile = () => {
             }}
         >
           {/* Header Section */}
-          <div style={{
+          <div className="profile-card-header" style={{
             background: 'linear-gradient(135deg, #2d73ff 0%, #6848ff 100%)',
             padding: '48px 24px',
             textAlign: 'center',
@@ -193,7 +194,7 @@ const Profile = () => {
              <Text style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '16px' }}>{email}</Text>
           </div>
 
-          <div style={{ padding: '40px 32px' }}>
+          <div className="profile-card-body" style={{ padding: '40px 32px' }}>
             {/* Account Information */}
             <Title level={4} style={{ marginBottom: '24px', color: '#1f1f1f', fontWeight: 600 }}>Account Information</Title>
             

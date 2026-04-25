@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MailOutlined, UserOutlined, DashboardOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
+import { MailOutlined, UserOutlined, DashboardOutlined, KeyOutlined, LogoutOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons';
 import CustomAvatar from './Avatar';
-import { Dropdown, Space, Typography, Badge, Avatar as AntAvatar } from 'antd';
+import { Dropdown, Space, Typography, Badge, Avatar as AntAvatar, Divider } from 'antd';
 import { useUser } from '../context/UserContext';
 import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, profilePicture, logout: contextLogout } = useUser();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
 
@@ -19,6 +20,16 @@ const Navbar = () => {
 
   const userName = user?.name || "User";
   const displayProfilePicture = profilePicture;
+  
+  const handleBrandClick = () => {
+    if (!token) {
+      navigate('/login');
+    } else if (role === 'admin') {
+      navigate('/admin-panel');
+    } else {
+      navigate('/home');
+    }
+  };
 
   const menuItems = [
     {
@@ -33,12 +44,12 @@ const Navbar = () => {
       label: 'Profile',
       onClick: () => navigate('/profile'),
     },
-    {
+    ...(role !== 'admin' ? [{
       key: 'change-password',
       icon: <KeyOutlined />,
       label: 'Change Password',
       onClick: () => navigate('/change-password'),
-    },
+    }] : []),
     {
       type: 'divider',
     },
@@ -53,7 +64,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <div className="brand" onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
+        <div className="brand" onClick={handleBrandClick} style={{ cursor: 'pointer' }}>
           <img src="/assets/trackease-logo.png" alt="TrackEase Pro" className="brand-logo" />
           <span className="brand-text">TrackEase Pro</span>
         </div>
@@ -87,15 +98,10 @@ const Navbar = () => {
                   <Link to="/admin-panel">Dashboard</Link>
                 </li>
               )}
-              <li style={{ display: 'none' }}>
-                <button onClick={handleLogout} className="logout-btn">
-                  Logout
-                </button>
-              </li>
               <li>
                 <NotificationBell />
               </li>
-              <li>
+              <li className="desktop-user-menu">
                 <Dropdown 
                   menu={{ 
                     items: menuItems, 
@@ -121,7 +127,7 @@ const Navbar = () => {
                     ) : (
                       <CustomAvatar name={userName} size="32px" fontSize="0.85rem" />
                     )}
-                    <Typography.Text style={{ fontWeight: 500, fontSize: '15px', color: '#333' }}>
+                    <Typography.Text className="user-name-text">
                       {userName}
                     </Typography.Text>
                     <svg 
@@ -145,6 +151,76 @@ const Navbar = () => {
             </>
           )}
         </ul>
+
+        <div className="mobile-nav-controls">
+          {token && <NotificationBell />}
+          <div className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            {isMobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="mobile-dropdown">
+            <div className="mobile-dropdown-header">
+               <div className="brand" onClick={() => { handleBrandClick(); setIsMobileMenuOpen(false); }} style={{ cursor: 'pointer' }}>
+                <img src="/assets/trackease-logo.png" alt="TrackEase Pro" className="brand-logo" />
+                <span className="brand-text">TrackEase Pro</span>
+              </div>
+              <div className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}>
+                <CloseOutlined />
+              </div>
+            </div>
+            
+            <div className="mobile-links">
+              {!token ? (
+                <>
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Login</Link>
+                  <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
+                </>
+              ) : (
+                <>
+                  {(role === 'user' || role === 'student') && (
+                    <>
+                      <Link to="/home" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+                      <Link to="/user-panel" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+                      <Link to="/raise-complaint" onClick={() => setIsMobileMenuOpen(false)}>Raise Complaint</Link>
+                    </>
+                  )}
+                  {role === 'admin' && (
+                    <Link to="/admin-panel" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+                  )}
+                  <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
+                  {role !== 'admin' && (
+                    <Link to="/change-password" onClick={() => setIsMobileMenuOpen(false)}>Change Password</Link>
+                  )}
+                </>
+              )}
+            </div>
+
+            {token && (
+              <>
+                <Divider style={{ margin: '12px 0' }} />
+                <div className="mobile-user-info">
+                  <div className="user-details">
+                    {displayProfilePicture ? (
+                      <AntAvatar src={displayProfilePicture} size={40} />
+                    ) : (
+                      <CustomAvatar name={userName} size="40px" fontSize="1rem" />
+                    )}
+                    <div className="user-text">
+                      <span className="user-name">{userName}</span>
+                      <span className="user-email">{user?.email || user?.id || "User Account"}</span>
+                    </div>
+                  </div>
+                  <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="mobile-logout-btn">
+                    Logout
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );

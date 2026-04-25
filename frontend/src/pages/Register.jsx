@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 import { useUser } from '../context/UserContext';
 import { GoogleLogin } from '@react-oauth/google';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const Register = () => {
@@ -11,6 +12,7 @@ const Register = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -60,7 +62,7 @@ const Register = () => {
     } else if (name === 'password') {
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!passwordRegex.test(value)) {
-        errors.password = 'Must have 8+ chars, 1 uppercase, 1 number, 1 special char';
+        errors.password = 'strong password must have upperCase, lowerCase, Special Character and number';
       } else {
         delete errors.password;
       }
@@ -70,7 +72,22 @@ const Register = () => {
   };
 
   const handleInputChange = (setter, field) => (e) => {
-    const val = e.target.value;
+    let val = e.target.value;
+    
+    // Auto-prefix +91 for phone number
+    if (field === 'phoneNumber') {
+      if (val && !val.startsWith('+91')) {
+        // If they typed a number without +91, add it
+        if (/^\d/.test(val)) {
+            val = '+91' + val;
+        } else if (val === '+') {
+            val = '+91';
+        } else {
+            val = '+91';
+        }
+      }
+    }
+    
     setter(val);
     validateField(field, val);
   };
@@ -123,13 +140,13 @@ const Register = () => {
   return (
     <div className="modern-auth-page">
       <div className="modern-auth-wrapper">
-        <div className="modern-auth-bg-layer"></div>
+        <div className="modern-auth-header-logo">
+          <img src="/assets/trackease-logo.png" alt="TrackEase Pro" />
+          <h1>TrackEase Pro</h1>
+          <p>Create your account</p>
+        </div>
+
         <div className="modern-auth-card">
-          <div className="modern-auth-header-logo">
-            <img src="/assets/trackease-logo.png" alt="TrackEase Pro" />
-            <h1>TrackEase Pro</h1>
-          </div>
-          <h2>Register</h2>
           {error && <p className="modern-auth-error">{error}</p>}
           <form onSubmit={handleSubmit}>
             <div className="modern-form-group">
@@ -138,7 +155,7 @@ const Register = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Name"
+                placeholder="Enter your Name"
                 required
               />
             </div>
@@ -148,7 +165,7 @@ const Register = () => {
                 type="tel"
                 value={phoneNumber}
                 onChange={handleInputChange(setPhoneNumber, 'phoneNumber')}
-                placeholder="+919876543210"
+                placeholder="+91 XXXXX XXXXX"
                 required
               />
               {fieldErrors.phoneNumber && <span className="field-error">{fieldErrors.phoneNumber}</span>}
@@ -159,47 +176,53 @@ const Register = () => {
                 type="email"
                 value={email}
                 onChange={handleInputChange(setEmail, 'email')}
-                placeholder="abc@gmail.com"
+                placeholder="Enter your Email ID"
                 required
               />
               {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
             </div>
             <div className="modern-form-group">
               <label>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={handleInputChange(setPassword, 'password')}
-                placeholder="••••••••"
-                required
-              />
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={handleInputChange(setPassword, 'password')}
+                  placeholder="••••••••"
+                  required
+                />
+                <div 
+                  className="password-toggle-icon" 
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                </div>
+              </div>
               {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
             </div>
-            <button type="submit" className="modern-auth-button">Register</button>
+            <button type="submit" className="modern-auth-button">Create Account</button>
           </form>
 
-          <div className="modern-auth-divider">or</div>
+          <div className="modern-auth-divider">or continue with</div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="google-login-container">
             <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => setError('Google Registration Failed')}
                 useOneTap
                 theme="outline"
-                shape="rectangular"
-                width="100%"
-                text="continue_with"
+                shape="pill"
+                width="280px"
             />
           </div>
 
           <p className="modern-auth-link-text">
-            Already have an account?{' '}
-            <Link to="/login">Login</Link>
+            Already have an account? <Link to="/login">Sign In</Link>
           </p>
         </div>
       </div>
       <div className="modern-auth-footer">
-        © 2026 <strong>TrackEase Pro</strong>. All rights reserved.
+        <p>By continuing, you agree to our <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link></p>
       </div>
     </div>
   );

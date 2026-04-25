@@ -122,42 +122,32 @@ const Home = () => {
                 <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
 
                 {/* Hero Section */}
-                <div className="hero-container" style={{
-                    marginBottom: '80px',
-                    padding: '60px 48px',
-                    background: '#f0f7ff',
-                    borderRadius: '24px',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
-                    gap: '40px',
-                    flexWrap: 'nowrap',
-                    width: '100%'
-                }}>
-                    <div style={{ flex: '1 1 500px', textAlign: 'left' }}>
-                        <Space direction="vertical" size="large">
-                            <Title level={1} style={{ margin: 0, fontWeight: 800, color: '#003a8c', fontSize: '48px', lineHeight: 1.2 }}>
+                <div className="hero-section-container">
+                    <div className="hero-content">
+                        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                            <Title level={1} className="hero-title">
                                 Manage complaints efficiently with your <span style={{ color: '#1890ff' }}>Support Team</span>
                             </Title>
-                            <Paragraph style={{ fontSize: '19px', color: '#595959', maxWidth: '600px', lineHeight: 1.6 }}>
+                            <Paragraph className="hero-paragraph">
                                 The modern SaaS platform to track, update, and resolve technical issues faster than ever with real-time transparency.
                             </Paragraph>
-                            <Space size="middle" style={{ marginTop: '20px' }}>
-                                <Link to="/raise-complaint">
-                                    <Button type="primary" size="large" icon={<PlusOutlined />} shape="round" style={{ height: '54px', padding: '0 40px', fontSize: '17px', background: '#1890ff', border: 'none', boxShadow: '0 4px 14px 0 rgba(24,144,255,0.39)' }}>
+                            <div className="hero-buttons">
+                                <Link to="/raise-complaint" className="hero-btn-link">
+                                    <Button type="primary" size="large" icon={<PlusOutlined />} shape="round" className="hero-btn-primary">
                                         Raise Complaint
                                     </Button>
                                 </Link>
-                                <Link to="/user-panel">
-                                    <Button size="large" icon={<DashboardOutlined />} shape="round" style={{ height: '54px', padding: '0 40px', fontSize: '17px', border: '2px solid #e6f7ff', color: '#003a8c', fontWeight: '500' }}>
+                                <Link to="/user-panel" className="hero-btn-link">
+                                    <Button size="large" icon={<DashboardOutlined />} shape="round" className="hero-btn-secondary">
                                         View Dashboard
                                     </Button>
                                 </Link>
-                            </Space>
+                            </div>
                         </Space>
                     </div>
-                    <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div className="hero-logo-container">
                         <img src="/assets/trackease-logo.png" alt="TrackEase Pro" className="hero-logo" />
                     </div>
-
                 </div>
 
                 {/* New Feature Cards Section */}
@@ -212,44 +202,27 @@ const Home = () => {
                 </div>
 
                 {/* About Issue Tracker Section */}
-                <div style={{
-                    marginTop: '64px',
-                    background: 'white',
-                    borderRadius: '24px',
-                    padding: '48px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '48px',
-                    flexWrap: 'wrap'
-                }}>
-                    <div style={{ flex: '1 1 400px' }}>
-                        <Text strong style={{
-                            color: '#1890ff',
-                            fontSize: '13px',
-                            letterSpacing: '2px',
-                            textTransform: 'uppercase',
-                            display: 'block',
-                            marginBottom: '12px'
-                        }}>
+                <div className="about-section-container">
+                    <div className="about-content">
+                        <Text strong className="about-subtitle">
                             ABOUT ISSUE TRACKER
                         </Text>
-                        <Title level={2} style={{ margin: '0 0 16px 0', fontWeight: 700, color: '#141414' }}>
+                        <Title level={2} className="about-title">
                             Built for efficient complaint management
                         </Title>
-                        <Paragraph style={{ fontSize: '15px', color: '#595959', lineHeight: '1.8', marginBottom: '24px' }}>
+                        <Paragraph className="about-paragraph">
                             Our platform centralizes complaint tracking, offering real-time status updates
                             and a transparent resolution workflow. With separate roles for
                             admins and users, Issue Tracker ensures secure and structured handling of complaints.
                         </Paragraph>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="about-features-list">
                             {[
                                 'Centralized complaint tracking',
                                 'Real-time status updates',
                                 'Transparent resolution workflow',
                                 'Secure and structured complaint handling'
                             ].map((item, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div key={i} className="about-feature-item">
                                     <CheckCircleOutlined style={{ color: '#1890ff', fontSize: '18px' }} />
                                     <Text style={{ fontSize: '15px', color: '#434343' }}>{item}</Text>
                                 </div>
@@ -258,7 +231,7 @@ const Home = () => {
                     </div>
 
                     {/* SVG Illustration */}
-                    <div style={{ flex: '1 1 320px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div className="about-illustration">
                         <svg viewBox="0 0 400 300" style={{ width: '100%', maxWidth: '420px' }} xmlns="http://www.w3.org/2000/svg">
                             {/* Desk */}
                             <rect x="60" y="200" width="280" height="12" rx="6" fill="#e6f0fa" />

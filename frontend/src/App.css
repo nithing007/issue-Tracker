@@ -132,6 +132,241 @@ ul {
   font-size: 0.95rem;
 }
 
+.user-name-text {
+  font-weight: 500; 
+  font-size: 15px; 
+  color: #333;
+}
+
+.mobile-nav-controls {
+  display: none;
+}
+
+.mobile-menu-toggle {
+  display: none;
+}
+
+.mobile-dropdown {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.mobile-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.mobile-close-btn {
+  font-size: 22px;
+  cursor: pointer;
+  color: #333;
+  padding: 5px;
+}
+
+.mobile-links {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+
+.mobile-links a {
+  padding: 16px 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #f9f9f9;
+  transition: background 0.2s;
+}
+
+.mobile-links a:hover {
+  background: #f5f8fa;
+  color: var(--primary-color);
+}
+
+.mobile-user-info {
+  padding: 20px 25px;
+  background: #fafafa;
+  margin-top: auto;
+  border-top: 1px solid #eee;
+}
+
+.user-details {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.user-email {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.mobile-logout-btn {
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.mobile-logout-btn:hover {
+  background: #fff1f0;
+}
+
+/* Home Page Hero & About Sections */
+.hero-section-container {
+  margin-bottom: 80px;
+  padding: 60px 48px;
+  background: #f0f7ff;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 40px;
+  width: 100%;
+  align-items: center;
+}
+
+.hero-content {
+  flex: 1 1 500px;
+  text-align: left;
+}
+
+.hero-title {
+  margin: 0 !important;
+  font-weight: 800 !important;
+  color: #003a8c !important;
+  font-size: 48px !important;
+  line-height: 1.2 !important;
+}
+
+.hero-paragraph {
+  font-size: 19px;
+  color: #595959;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.hero-btn-primary {
+  height: 54px !important;
+  padding: 0 40px !important;
+  font-size: 17px !important;
+  background: #1890ff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px 0 rgba(24,144,255,0.39) !important;
+}
+
+.hero-btn-secondary {
+  height: 54px !important;
+  padding: 0 40px !important;
+  font-size: 17px !important;
+  border: 2px solid #e6f7ff !important;
+  color: #003a8c !important;
+  font-weight: 500 !important;
+}
+
+.hero-logo-container {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-section-container {
+  margin-top: 64px;
+  background: white;
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.about-content {
+  flex: 1 1 400px;
+}
+
+.about-subtitle {
+  color: #1890ff;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.about-title {
+  margin: 0 0 16px 0 !important;
+  font-weight: 700 !important;
+  color: #141414 !important;
+}
+
+.about-paragraph {
+  font-size: 15px;
+  color: #595959;
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.about-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-illustration {
+  flex: 1 1 320px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .nav-links a:hover {
   color: var(--primary-color);
 }
@@ -445,73 +680,121 @@ button[type="submit"]:hover {
 
   /* Navbar Responsiveness */
   .navbar {
-    padding: 1rem;
+    padding: 0.8rem 1.2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
   }
 
   .navbar-container {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 5px 0;
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+    justify-content: space-between;
   }
 
-  .navbar h1 {
-    font-size: 1.5rem;
-    text-align: center;
-    width: 100%;
-    margin-bottom: 5px;
+  .brand-logo {
+    height: 30px !important;
+  }
+
+  .brand-text {
+    font-size: 18px;
   }
 
   .nav-links {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: none !important;
   }
 
-  .nav-links li {
-    margin: 5px;
+  .mobile-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
   }
 
-  .nav-links a {
-    padding: 8px 12px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 6px;
-    display: inline-block;
-    border: 1px solid #eee;
+  .mobile-menu-toggle {
+    display: block;
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Adjust notification bell for mobile */
+  .mobile-nav-controls .notification-bell-container {
+    margin-right: 5px;
   }
 
   .logout-btn {
-    width: auto;
-    padding: 8px 20px;
+    display: none;
   }
 
-  /* Container Adjustments */
-  .container {
-    width: 95%;
-    padding: 0 10px;
-    margin-top: 10px;
-  }
-
-  .card {
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow-x: auto;
-    /* Allow scroll for non-card tables */
-  }
-
-  /* User Dashboard Layout Mobile Overrides */
-  .dashboard-layout {
+  /* Home Page Responsiveness */
+  .hero-section-container {
     flex-direction: column;
-    width: 95%;
+    padding: 30px 20px;
+    margin-bottom: 40px;
+    gap: 20px;
+    border-radius: 16px;
   }
 
-  .dashboard-info {
+  .hero-logo-container {
+    display: none; /* Hide hero logo on mobile */
+  }
+
+  .hero-content {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 28px !important;
+  }
+
+  .hero-paragraph {
+    font-size: 16px;
+    margin: 0 auto;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    gap: 12px;
     width: 100%;
   }
 
-  .dashboard-form-container {
+  .hero-btn-link {
     width: 100%;
+  }
+
+  .hero-btn-primary, .hero-btn-secondary {
+    width: 100% !important;
+    padding: 0 !important;
+    height: 48px !important;
+  }
+
+  .about-section-container {
+    padding: 24px;
+    margin-top: 40px;
+    gap: 30px;
+    border-radius: 16px;
+  }
+
+  .about-content {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .about-title {
+    font-size: 22px !important;
+  }
+
+  .about-feature-item {
+    justify-content: center;
+  }
+
+  .about-illustration {
+    flex: 1 1 auto;
+    order: -1; /* Show illustration above text on mobile for better flow */
   }
 
   /* Auth Container Responsiveness */
@@ -522,25 +805,63 @@ button[type="submit"]:hover {
   }
 
   /* Form Responsiveness */
-  .form-row {
-    grid-template-columns: 1fr;
-    /* Stack form rows if used */
-  }
-
   .form-group input,
   .form-group select,
   .form-group textarea {
-    width: 100%;
-    font-size: 16px;
-    /* Prevents zoom on iOS */
+    font-size: 16px; /* Prevents zoom on iOS */
     padding: 14px;
-    /* Larger touch area */
   }
 
   button[type="submit"] {
-    width: 100%;
     padding: 16px;
     font-size: 1.1rem;
+  }
+
+  /* Container Adjustments */
+  .container {
+    width: 95%;
+    padding: 0 10px;
+    margin-top: 10px;
+  }
+
+  /* Raise Complaint & Profile Page Responsiveness */
+  .raise-complaint-container, .profile-container {
+    padding: 20px 10px !important;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  /* Dashboard Box Responsiveness */
+  .quick-stats-strip {
+    flex-direction: column;
+  }
+
+  .dashboard-card {
+    padding: 16px !important;
+  }
+
+  .dashboard-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .table-controls-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .table-controls-left {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .table-controls-left > * {
+    width: 100% !important;
   }
 
   /* Generic Table Compacting */
@@ -596,38 +917,41 @@ button[type="submit"]:hover {
     border-bottom: none;
   }
 
-  /* Add labels via CSS */
   .complaint-table.my-complaints td::before {
     font-weight: 600;
     color: var(--primary-color);
-    /* Use primary color for labels */
     text-align: left;
     margin-right: 15px;
   }
 
-  .complaint-table.my-complaints td:nth-of-type(1)::before {
-    content: "Title";
+  .complaint-table.my-complaints td:nth-of-type(1)::before { content: "Title"; }
+  .complaint-table.my-complaints td:nth-of-type(2)::before { content: "Category"; }
+  .complaint-table.my-complaints td:nth-of-type(3)::before { content: "Status"; }
+  .complaint-table.my-complaints td:nth-of-type(4)::before { content: "Date"; }
+  .complaint-table.my-complaints td:nth-of-type(5)::before { content: "Remarks"; }
+
+  /* Profile Page Responsiveness Enhancements */
+  .profile-content {
+    padding: 32px 16px !important;
   }
 
-  .complaint-table.my-complaints td:nth-of-type(2)::before {
-    content: "Category";
+  .profile-card {
+    border-radius: 16px !important;
   }
 
-  .complaint-table.my-complaints td:nth-of-type(3)::before {
-    content: "Status";
+  .profile-card-header {
+    padding: 32px 16px !important;
   }
 
-  .complaint-table.my-complaints td:nth-of-type(4)::before {
-    content: "Date";
+  .profile-card-body {
+    padding: 24px 16px !important;
   }
 
-  .complaint-table.my-complaints td:nth-of-type(5)::before {
-    content: "Remarks";
-  }
-
-  /* Ensure card container doesn't force scroll when in card mode */
-  .card:has(.complaint-table.my-complaints) {
-    overflow-x: visible;
+  .profile-info-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 4px;
+    padding: 12px 0 !important;
   }
 }
 

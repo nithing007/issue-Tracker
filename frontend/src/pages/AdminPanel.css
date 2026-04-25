@@ -418,3 +418,148 @@
 .activity-icon-orange { color: #f59e0b; }
 .activity-content p { margin: 0 0 4px 0; font-size: 0.9rem; color: #334155; line-height: 1.4; font-weight: 500; }
 .activity-content small { font-size: 0.75rem; color: #94a3b8; }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .modern-admin-container {
+    padding: 20px 12px;
+    gap: 16px;
+  }
+
+  .summary-cards-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-summary-card {
+    padding: 12px 16px;
+  }
+
+  .priority-alert-body {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .admin-control-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-search {
+    min-width: 100%;
+  }
+
+  .admin-filters {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-filter-select {
+    width: 100%;
+  }
+
+  .admin-bulk-action-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .bulk-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .bulk-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* Table to Card layout */
+  .admin-interactive-table, 
+  .admin-interactive-table thead, 
+  .admin-interactive-table tbody, 
+  .admin-interactive-table th, 
+  .admin-interactive-table td, 
+  .admin-interactive-table tr {
+    display: block;
+  }
+
+  .admin-interactive-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .admin-interactive-table tr {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    background: white;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+
+  .admin-interactive-table td {
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    position: relative;
+    padding-left: 45% !important;
+    text-align: right;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .admin-interactive-table td:last-child {
+    border-bottom: none;
+    justify-content: center;
+    padding-left: 16px !important;
+    margin-top: 8px;
+  }
+
+  .admin-interactive-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 12px;
+    width: 40%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 700;
+    color: #64748b;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  /* Assign labels via nth-child if data-label is missing, 
+     but adding data-label in JSX is cleaner. I'll use nth-child for now */
+  .admin-interactive-table td:nth-of-type(1)::before { content: "Select"; }
+  .admin-interactive-table td:nth-of-type(2)::before { content: "Priority"; }
+  .admin-interactive-table td:nth-of-type(3)::before { content: "User"; }
+  .admin-interactive-table td:nth-of-type(4)::before { content: "Title"; }
+  .admin-interactive-table td:nth-of-type(5)::before { content: "Status"; }
+  .admin-interactive-table td:nth-of-type(6)::before { content: "Date"; }
+  .admin-interactive-table td:nth-of-type(7)::before { content: ""; } /* Actions label hide */
+
+  .admin-action-icons {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .expanded-details-container {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .admin-expanded-row td {
+    padding-left: 16px !important;
+    text-align: left;
+    display: block;
+  }
+
+  .admin-expanded-row td::before {
+    display: none;
+  }
+}

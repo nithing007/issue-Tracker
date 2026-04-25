@@ -3,12 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 import { useUser } from '../context/UserContext';
 import { GoogleLogin } from '@react-oauth/google';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const Login = () => {
   const { updateUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -95,13 +97,13 @@ const Login = () => {
   return (
     <div className="modern-auth-page">
       <div className="modern-auth-wrapper">
-        <div className="modern-auth-bg-layer"></div>
+        <div className="modern-auth-header-logo">
+          <img src="/assets/trackease-logo.png" alt="TrackEase Pro" />
+          <h1>TrackEase Pro</h1>
+          <p>Welcome back!</p>
+        </div>
+        
         <div className="modern-auth-card">
-          <div className="modern-auth-header-logo">
-            <img src="/assets/trackease-logo.png" alt="TrackEase Pro" />
-            <h1>TrackEase Pro</h1>
-          </div>
-          <h2>Login</h2>
           {error && <p className="modern-auth-error">{error}</p>}
           <form onSubmit={handleSubmit}>
             <div className="modern-form-group">
@@ -110,48 +112,54 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="abc@gmail.com"
+                placeholder="Enter your Email ID"
                 required
               />
             </div>
             <div className="modern-form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label>Password</label>
-                <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: '#4a75cc', textDecoration: 'none', marginBottom: '6px' }}>Forgot Password?</Link>
+                <Link to="/forgot-password" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', marginBottom: '8px', fontWeight: '600' }}>Forgot password?</Link>
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+                <div 
+                  className="password-toggle-icon" 
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                </div>
+              </div>
             </div>
-            <button type="submit" className="modern-auth-button">Login</button>
+            <button type="submit" className="modern-auth-button">Sign In</button>
           </form>
 
-          <div className="modern-auth-divider">or</div>
+          <div className="modern-auth-divider">or continue with</div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="google-login-container">
             <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => setError('Google Login Failed')}
                 useOneTap
                 theme="outline"
-                shape="rectangular"
-                width="100%"
-                text="continue_with"
+                shape="pill"
+                width="280px"
             />
           </div>
 
           <p className="modern-auth-link-text">
-            Don&apos;t have an account?{' '}
-            <Link to="/register">Sign Up</Link>
+            Don't have an account? <Link to="/register">Sign Up</Link>
           </p>
         </div>
       </div>
       <div className="modern-auth-footer">
-        © 2026 <strong>TrackEase Pro</strong>. All rights reserved.
+        <p>By continuing, you agree to our <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link></p>
       </div>
     </div>
   );
