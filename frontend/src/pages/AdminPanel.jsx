@@ -23,6 +23,7 @@ const getPriority = (complaint) => {
 };
 
 const AdminPanel = () => {
+  const API = import.meta.env.VITE_API_URL;
   const [complaints, setComplaints] = useState([]);
   const socket = useSocket();
   const [loading, setLoading] = useState(true);
@@ -82,7 +83,7 @@ const AdminPanel = () => {
   const fetchComplaints = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/complaints/all', {
+      const response = await fetch(`${API}/api/complaints/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.status === 401 || response.status === 403) {
@@ -107,7 +108,7 @@ const AdminPanel = () => {
 
   const handleUpdate = async (id, status, remarks) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/complaints/${id}`, {
+      const response = await fetch(`${API}/api/complaints/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +134,7 @@ const AdminPanel = () => {
     setLoading(true);
     try {
       await Promise.all(selectedRows.map(id => 
-        fetch(`http://localhost:5000/api/complaints/${id}`, {
+        fetch(`${API}/api/complaints/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ status })
@@ -355,7 +356,7 @@ const AdminRow = ({ complaint, isSelected, onSelect, onUpdate }) => {
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/complaints/${complaint._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/complaints/${complaint._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ newComment: { text: commentText, sender: 'Admin' } })

@@ -10,6 +10,7 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const Profile = () => {
+  const API = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const { user, profilePicture, updateProfilePicture, logout: contextLogout } = useUser();
   const role = localStorage.getItem('role') || 'user';
@@ -23,7 +24,7 @@ const Profile = () => {
     const fetchCount = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/complaints/count', {
+        const response = await fetch(`${API}/api/complaints/count`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -62,7 +63,7 @@ const Profile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/update-profile', {
+      const response = await fetch(`${API}/api/auth/update-profile`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}` 

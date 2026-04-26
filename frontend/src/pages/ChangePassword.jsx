@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import axios from 'axios';
 
 const ChangePassword = () => {
+  const API = import.meta.env.VITE_API_URL;
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -36,7 +37,7 @@ const ChangePassword = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/auth/change-password', 
+      const response = await axios.post(`${API}/api/auth/change-password`, 
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );

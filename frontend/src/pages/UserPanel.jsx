@@ -7,6 +7,7 @@ import { useSocket } from '../context/SocketContext';
 import './Dashboard.css';
 
 const UserPanel = () => {
+  const API = import.meta.env.VITE_API_URL;
   const [complaints, setComplaints] = useState([]);
   const socket = useSocket();
   const [statusMsg, setStatusMsg] = useState('');
@@ -90,7 +91,7 @@ const UserPanel = () => {
   const fetchComplaints = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/complaints/my', {
+      const response = await fetch(`${API}/api/complaints/my`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -138,7 +139,7 @@ const UserPanel = () => {
   const handleDelete = async (id) => {
 
     try {
-      const response = await fetch(`http://localhost:5000/api/complaints/${id}`, {
+      const response = await fetch(`${API}/api/complaints/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -160,7 +161,7 @@ const UserPanel = () => {
   const onUpdate = async (values) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/complaints/${selectedComplaint._id}`, {
+      const response = await fetch(`${API}/api/complaints/${selectedComplaint._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +254,7 @@ ${complaint.remarks ? '\nAdmin Remarks:\n' + complaint.remarks : ''}`;
     if (!commentText.trim() && commentAttachments.length === 0) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/complaints/${complaintId}`, {
+      const response = await fetch(`${API}/api/complaints/${complaintId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

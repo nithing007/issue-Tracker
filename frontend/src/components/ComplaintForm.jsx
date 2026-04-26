@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const ComplaintForm = () => {
+    const API = import.meta.env.VITE_API_URL;
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('Hardware');
@@ -55,7 +56,7 @@ const ComplaintForm = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/api/complaints', {
+            const response = await fetch(`${API}/api/complaints`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

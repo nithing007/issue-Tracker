@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 const MyComplaints = () => {
+    const API = import.meta.env.VITE_API_URL;
     const [complaints, setComplaints] = useState([]);
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const MyComplaints = () => {
 
     const fetchComplaints = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/complaints/my', {
+            const response = await fetch(`${API}/api/complaints/my`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

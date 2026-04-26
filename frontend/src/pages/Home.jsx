@@ -20,6 +20,7 @@ const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
 const Home = () => {
+    const API = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
@@ -43,7 +44,7 @@ const Home = () => {
         // Fetch data using existing API
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/complaints/my', {
+                const response = await fetch(`${API}/api/complaints/my`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 

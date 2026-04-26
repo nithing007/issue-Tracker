@@ -7,6 +7,7 @@ import { useSocket } from '../context/SocketContext';
 const { Text } = Typography;
 
 const NotificationBell = () => {
+  const API = import.meta.env.VITE_API_URL;
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -16,7 +17,7 @@ const NotificationBell = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/notifications', {
+      const res = await axios.get(`${API}/api/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(res.data);
@@ -65,7 +66,7 @@ const NotificationBell = () => {
   const markAsRead = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/notifications/${id}/read`, {}, {
+      await axios.put(`${API}/api/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
@@ -78,7 +79,7 @@ const NotificationBell = () => {
   const markAllRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5000/api/notifications/read-all', {}, {
+      await axios.put(`${API}/api/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));

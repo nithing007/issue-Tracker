@@ -4,6 +4,7 @@ import './Auth.css';
 import axios from 'axios';
 
 const ForgotPassword = () => {
+  const API = import.meta.env.VITE_API_URL;
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -17,7 +18,7 @@ const ForgotPassword = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      const response = await axios.post(`${API}/api/auth/forgot-password`, { email });
       setSuccess(response.data.message);
     } catch (err) {
       setError(err.response?.data?.message || 'Request failed');

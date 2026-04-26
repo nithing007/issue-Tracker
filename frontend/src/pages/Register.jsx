@@ -7,6 +7,7 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const Register = () => {
+  const API = import.meta.env.VITE_API_URL;
   const { updateUser } = useUser();
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -19,7 +20,7 @@ const Register = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const { credential } = credentialResponse;
-      const response = await axios.post('http://localhost:5000/api/auth/google', {
+      const response = await axios.post(`${API}/api/auth/google`, {
         token: credential
       });
 
@@ -102,7 +103,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
