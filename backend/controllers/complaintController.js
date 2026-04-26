@@ -147,7 +147,7 @@ const updateComplaintStatus = async (req, res) => {
               <p><strong>Complaint ID:</strong> ${complaint._id}</p>
               <p><strong>Current Status:</strong> ${complaint.status}</p>
               <br>
-              <p>Login to Issue Tracker to view more details and reply: <a href="http://localhost:5173/user-panel">Go to Dashboard</a></p>
+              <p>Login to Issue Tracker to view more details and reply: <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/user-panel">Go to Dashboard</a></p>
               <p>Thank you for using our service!</p>
             </body>
           </html>
@@ -217,7 +217,7 @@ const updateComplaint = async (req, res) => {
                 <p>User <strong>${req.user.name}</strong> sent a new message on complaint #${complaint._id.toString().slice(-6)}.</p>
                 <p><strong>Complaint ID:</strong> ${complaint._id}</p>
                 <br>
-                <p><a href="http://localhost:5173/admin-panel">Go to Admin Dashboard</a></p>
+                <p><a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin-panel">Go to Admin Dashboard</a></p>
               </body>
             </html>
           `;

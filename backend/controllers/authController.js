@@ -33,7 +33,7 @@ const registerUser = async (req, res) => {
     // Password validation: Strong password
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(password)) {
-      return res.status(400).json({ message: 'Password must be at least 8 characters long, include uppercase, number, and special character.' });
+      return res.status(400).json({ message: 'Strong password must contain atleast 1 UpperCase,LowerCase,atleast 1 Special Characters and numbers' });
     }
 
     const userExists = await User.findOne({ email });
@@ -65,7 +65,11 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: 'Registration failed' });
+    console.log("REGISTER ERROR:", error);
+    res.status(500).json({ 
+      message: 'Registration failed', 
+      error: error.message 
+    });
   }
 };
 
@@ -101,7 +105,11 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: 'Login failed' });
+    console.log("LOGIN ERROR:", error);
+    res.status(500).json({ 
+      message: 'Login failed', 
+      error: error.message 
+    });
   }
 };
 
@@ -115,7 +123,7 @@ const updateProfile = async (req, res) => {
 
     if (req.file) {
       // Store the full URL or relative path
-      const profilePicUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+      const profilePicUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
       user.profilePicture = profilePicUrl;
     } else if (req.body.profilePicture) {
         user.profilePicture = req.body.profilePicture;
@@ -222,7 +230,7 @@ const changePassword = async (req, res) => {
     // Validate new password strength
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(newPassword)) {
-      return res.status(400).json({ message: 'New password is not strong enough' });
+      return res.status(400).json({ message: 'Strong password must contain atleast 1 UpperCase,LowerCase,atleast 1 Special Characters and numbers' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -267,7 +275,7 @@ const resetPassword = async (req, res) => {
         // Validate password strength
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!passwordRegex.test(newPassword)) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters long, include uppercase, number, and special character.' });
+            return res.status(400).json({ message: 'Strong password must contain atleast 1 UpperCase,LowerCase,atleast 1 Special Characters and numbers' });
         }
 
         const salt = await bcrypt.genSalt(10);

@@ -29,7 +29,7 @@ const ChangePassword = () => {
     }
 
     if (!validatePassword(newPassword)) {
-      setError('New password must have 8+ chars, 1 uppercase, 1 number, and 1 special char');
+      setError('Strong password must contain atleast 1 UpperCase,LowerCase,atleast 1 Special Characters and numbers');
       return;
     }
 

@@ -62,7 +62,7 @@ const Register = () => {
     } else if (name === 'password') {
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!passwordRegex.test(value)) {
-        errors.password = 'strong password must have upperCase, lowerCase, Special Character and number';
+        errors.password = 'Strong password must contain atleast 1 UpperCase,LowerCase,atleast 1 Special Characters and numbers';
       } else {
         delete errors.password;
       }
