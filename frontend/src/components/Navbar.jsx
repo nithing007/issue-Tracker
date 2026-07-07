@@ -5,6 +5,7 @@ import CustomAvatar from './Avatar';
 import { Dropdown, Space, Typography, Badge, Avatar as AntAvatar, Divider } from 'antd';
 import { useUser } from '../context/UserContext';
 import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -77,6 +78,9 @@ const Navbar = () => {
               <li>
                 <Link to="/register">Register</Link>
               </li>
+              <li>
+                <ThemeToggle />
+              </li>
             </>
           ) : (
             <>
@@ -100,6 +104,9 @@ const Navbar = () => {
               )}
               <li>
                 <NotificationBell />
+              </li>
+              <li>
+                <ThemeToggle />
               </li>
               <li className="desktop-user-menu">
                 <Dropdown 
@@ -153,6 +160,7 @@ const Navbar = () => {
         </ul>
 
         <div className="mobile-nav-controls">
+          <ThemeToggle />
           {token && <NotificationBell />}
           <div className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             {isMobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}

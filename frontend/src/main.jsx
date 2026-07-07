@@ -8,6 +8,7 @@ import './App.css';
 
 import { UserProvider } from './context/UserContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
+import { ThemeProvider } from './context/ThemeProvider.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 const GOOGLE_CLIENT_ID = "933220651174-setbdihh1rv8ro6opcgjt8rhqaav6cvm.apps.googleusercontent.com";
@@ -17,11 +18,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <BrowserRouter>
-          <UserProvider>
-            <SocketProvider>
-              <App />
-            </SocketProvider>
-          </UserProvider>
+          <ThemeProvider>
+            <UserProvider>
+              <SocketProvider>
+                <App />
+              </SocketProvider>
+            </UserProvider>
+          </ThemeProvider>
         </BrowserRouter>
       </GoogleOAuthProvider>
     </ErrorBoundary>
