@@ -1,36 +1,21 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
 
-  const cycleTheme = () => {
-    if (theme === 'system') {
-      setTheme('light');
-    } else if (theme === 'light') {
-      setTheme('dark');
-    } else {
-      setTheme('system');
-    }
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  let title = "Switch to Light Mode";
-  let Icon = Monitor;
-  if (theme === 'system') {
-    title = "System Mode (Cycle to Light)";
-    Icon = Monitor;
-  } else if (theme === 'light') {
-    title = "Light Mode (Cycle to Dark)";
-    Icon = Sun;
-  } else if (theme === 'dark') {
-    title = "Dark Mode (Cycle to System)";
-    Icon = Moon;
-  }
+  const isDark = theme === 'dark';
+  const title = isDark ? "Switch to Light Mode" : "Switch to Dark Mode";
+  const Icon = isDark ? Sun : Moon;
 
   return (
     <button
-      onClick={cycleTheme}
+      onClick={toggleTheme}
       className="theme-toggle-btn"
       aria-label={title}
       title={title}
