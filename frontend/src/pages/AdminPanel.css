@@ -563,3 +563,209 @@
     display: none;
   }
 }
+
+/* Admin Dashboard Page Dark Mode Overrides */
+html.dark .modern-admin-bg {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+}
+
+html.dark .admin-summary-card {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .admin-summary-title {
+  color: #CBD5E1 !important;
+}
+
+html.dark .admin-summary-value {
+  color: #F8FAFC !important;
+}
+
+html.dark .admin-summary-icon.total-icon {
+  background-color: #1e3a8a !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .admin-summary-icon.pending-icon {
+  background-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+
+html.dark .admin-summary-icon.inprogress-icon {
+  background-color: #713f12 !important;
+  color: #fde68a !important;
+}
+
+html.dark .admin-summary-icon.resolved-icon {
+  background-color: #064e3b !important;
+  color: #a7f3d0 !important;
+}
+
+html.dark .priority-alert-panel {
+  background: linear-gradient(135deg, #7f1d1d 0%, #1e293b 100%) !important;
+  border-left: 4px solid #ef4444 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .priority-alert-header {
+  color: #ef4444 !important;
+}
+
+html.dark .priority-alert-item {
+  color: #fca5a5 !important;
+}
+
+html.dark .admin-search input {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+html.dark .admin-search input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+html.dark .admin-filter-select {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+
+html.dark .admin-bulk-action-bar {
+  background-color: #1e3a8a !important;
+  border-color: #3b82f6 !important;
+}
+
+html.dark .admin-bulk-action-bar span {
+  color: #e0e7ff !important;
+}
+
+html.dark .admin-interactive-table th {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+  border-bottom: 2px solid #334155 !important;
+}
+
+html.dark .admin-interactive-table td {
+  border-bottom: 1px solid #334155 !important;
+  background-color: #1E293B !important;
+  color: #E2E8F0 !important;
+}
+
+html.dark .admin-table-row:hover {
+  background-color: #111827 !important;
+}
+
+html.dark .admin-table-row.row-high-priority {
+  background-color: #2c1a1a !important;
+}
+
+html.dark .admin-table-row.row-high-priority:hover {
+  background-color: #3a1e1e !important;
+}
+
+html.dark .admin-cell-title {
+  color: #F8FAFC !important;
+}
+
+html.dark .admin-cell-category {
+  color: #CBD5E1 !important;
+}
+
+html.dark .status-inline-popup {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+}
+
+html.dark .popup-btn-cancel {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+}
+
+html.dark .admin-expanded-row {
+  background-color: #0F172A !important;
+}
+
+html.dark .admin-expanded-row td {
+  border-bottom: 2px solid #334155 !important;
+}
+
+html.dark .expanded-col h4 {
+  color: #38bdf8 !important;
+}
+
+html.dark .expanded-col p {
+  color: #E2E8F0 !important;
+}
+
+html.dark .expanded-col strong {
+  color: #F8FAFC !important;
+}
+
+html.dark .remark-bubble {
+  background-color: #0F172A !important;
+  border-color: #334155 !important;
+  color: #E2E8F0 !important;
+}
+
+html.dark .mini-timeline::before {
+  background-color: #334155 !important;
+}
+
+html.dark .mt-item {
+  color: #CBD5E1 !important;
+}
+
+html.dark .mt-dot {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+html.dark .mt-dot.done {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+html.dark .admin-sidebar-title {
+  color: #38bdf8 !important;
+  border-bottom-color: #334155 !important;
+}
+
+html.dark .quick-action-btn {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+html.dark .quick-action-btn:hover {
+  background-color: #111827 !important;
+}
+
+html.dark .qa-icon.user-icon {
+  background-color: #1e3a8a !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .qa-text {
+  color: #CBD5E1 !important;
+}
+
+html.dark .activity-icon-wrapper {
+  background-color: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+html.dark .activity-content p {
+  color: #F8FAFC !important;
+}
+
+html.dark .activity-content small {
+  color: #64748B !important;
+}
+

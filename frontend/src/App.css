@@ -1291,7 +1291,7 @@ html.dark .user-name-text {
   color: #CBD5E1 !important;
 }
 
-/* Cards, Wrappers & Panels */
+/* Cards & Modals & Panels */
 html.dark .card,
 html.dark .welcome-banner,
 html.dark .info-card,
@@ -1300,6 +1300,7 @@ html.dark .admin-summary-card,
 html.dark .admin-sidebar-card,
 html.dark .modern-auth-card,
 html.dark .profile-card,
+html.dark .ant-card,
 html.dark .ant-layout-content > div {
   background-color: #1E293B !important;
   background: #1E293B !important;
@@ -1310,7 +1311,8 @@ html.dark .ant-layout-content > div {
 html.dark .card h3,
 html.dark .info-card h3,
 html.dark .dashboard-card-title,
-html.dark .admin-sidebar-title {
+html.dark .admin-sidebar-title,
+html.dark .profile-card h3 {
   color: #38bdf8 !important;
   border-bottom: 1px solid #334155 !important;
 }
@@ -1331,13 +1333,13 @@ html.dark .welcome-banner p {
   color: #CBD5E1 !important;
 }
 
-/* Typography */
+/* Typography & Sub-titles */
 html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
-html.dark .ant-typography, html.dark .ant-typography-title {
+html.dark .ant-typography, html.dark .ant-typography-title, html.dark .about-title {
   color: #F8FAFC !important;
 }
 
-html.dark p, html.dark span, html.dark label, html.dark li,
+html.dark p, html.dark span, html.dark label, html.dark li, html.dark td, html.dark th,
 html.dark .ant-typography-secondary, html.dark .text-secondary {
   color: #CBD5E1 !important;
 }
@@ -1416,8 +1418,7 @@ html.dark .admin-interactive-table td {
 html.dark tr:hover td,
 html.dark .complaint-table tr:hover td,
 html.dark .dashboard-table tr:hover td,
-html.dark .admin-interactive-table tr:hover td,
-html.dark .admin-table-row:hover {
+html.dark .admin-interactive-table tr:hover td {
   background-color: #111827 !important;
 }
 
@@ -1456,24 +1457,26 @@ html.dark .about-section-container {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
-html.dark .about-title {
-  color: #F8FAFC !important;
-}
-
 html.dark .about-paragraph {
   color: #CBD5E1 !important;
 }
 
-/* Ant Design Modals & Overrides */
+html.dark .about-feature-item span {
+  color: #CBD5E1 !important;
+}
+
+/* Ant Design Dropdown, select, modal Override in Dark Mode */
+html.dark .ant-dropdown-menu,
+html.dark .ant-select-dropdown,
 html.dark .ant-modal-content {
   background-color: #1E293B !important;
-  background: #1E293B !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
   color: #E2E8F0 !important;
 }
 
 html.dark .ant-modal-header {
   background-color: #1E293B !important;
-  background: #1E293B !important;
   border-bottom: 1px solid #334155 !important;
 }
 
@@ -1489,13 +1492,6 @@ html.dark .ant-modal-footer {
   border-top: 1px solid #334155 !important;
 }
 
-html.dark .ant-dropdown-menu,
-html.dark .ant-select-dropdown {
-  background-color: #1E293B !important;
-  border: 1px solid #334155 !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
-}
-
 html.dark .ant-dropdown-menu-item,
 html.dark .ant-select-item {
   color: #CBD5E1 !important;
@@ -1504,6 +1500,10 @@ html.dark .ant-select-item {
 html.dark .ant-dropdown-menu-item:hover,
 html.dark .ant-select-item-option-active {
   background-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+html.dark .ant-typography {
   color: #F8FAFC !important;
 }
 

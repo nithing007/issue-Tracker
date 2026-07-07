@@ -223,3 +223,72 @@
 .password-toggle-icon:hover {
   color: #2563eb;
 }
+
+/* Auth Page Dark Mode Overrides */
+html.dark .modern-auth-page {
+  background-color: #0F172A !important;
+  color: #E2E8F0 !important;
+}
+
+html.dark .modern-auth-card {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark .modern-form-group label {
+  color: #CBD5E1 !important;
+}
+
+html.dark .modern-form-group input {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark .modern-form-group input:focus {
+  background-color: #0F172A !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+}
+
+html.dark .modern-auth-header-logo p {
+  color: #CBD5E1 !important;
+}
+
+html.dark .modern-auth-divider {
+  color: #64748B !important;
+}
+
+html.dark .modern-auth-divider::before,
+html.dark .modern-auth-divider::after {
+  border-bottom-color: #334155 !important;
+}
+
+html.dark .modern-auth-link-text {
+  color: #CBD5E1 !important;
+}
+
+html.dark .modern-auth-footer {
+  color: #64748B !important;
+}
+
+html.dark .modern-auth-footer a {
+  color: #CBD5E1 !important;
+}
+
+html.dark .modern-auth-footer a:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark .modern-auth-card h2 {
+  color: #F8FAFC !important;
+}
+
+html.dark .modern-auth-error {
+  background-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+  border-color: #b91c1c !important;
+}
+
