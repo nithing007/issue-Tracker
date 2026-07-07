@@ -1257,14 +1257,20 @@ html.dark {
   --text-color: #F8FAFC;
 }
 
-html.dark body {
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%) !important;
-  color: #F8FAFC !important;
+html.dark body,
+html.dark .ant-layout,
+html.dark .modern-dashboard-bg,
+html.dark .modern-admin-bg,
+html.dark .modern-auth-page {
+  background: #0F172A !important;
+  background-color: #0F172A !important;
+  color: #E2E8F0 !important;
 }
 
 /* Navbar */
 html.dark .navbar {
   background-color: #111827 !important;
+  background: #111827 !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
   border-bottom: 1px solid #334155 !important;
 }
@@ -1285,17 +1291,26 @@ html.dark .user-name-text {
   color: #CBD5E1 !important;
 }
 
-/* Cards & Modals */
+/* Cards, Wrappers & Panels */
 html.dark .card,
 html.dark .welcome-banner,
-html.dark .info-card {
+html.dark .info-card,
+html.dark .dashboard-card,
+html.dark .admin-summary-card,
+html.dark .admin-sidebar-card,
+html.dark .modern-auth-card,
+html.dark .profile-card,
+html.dark .ant-layout-content > div {
   background-color: #1E293B !important;
+  background: #1E293B !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3) !important;
   border: 1px solid #334155 !important;
 }
 
 html.dark .card h3,
-html.dark .info-card h3 {
+html.dark .info-card h3,
+html.dark .dashboard-card-title,
+html.dark .admin-sidebar-title {
   color: #38bdf8 !important;
   border-bottom: 1px solid #334155 !important;
 }
@@ -1316,52 +1331,98 @@ html.dark .welcome-banner p {
   color: #CBD5E1 !important;
 }
 
-/* Typography & Sub-titles */
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+/* Typography */
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
+html.dark .ant-typography, html.dark .ant-typography-title {
   color: #F8FAFC !important;
 }
 
-/* Forms & Inputs */
-html.dark .form-group label {
+html.dark p, html.dark span, html.dark label, html.dark li,
+html.dark .ant-typography-secondary, html.dark .text-secondary {
   color: #CBD5E1 !important;
 }
 
+/* Forms & Inputs */
+html.dark .form-group label,
+html.dark .modern-form-group label {
+  color: #CBD5E1 !important;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select,
+html.dark .ant-input,
+html.dark .ant-select-selector,
+html.dark .popup-select,
+html.dark .popup-input,
 html.dark .form-group input,
 html.dark .form-group textarea,
 html.dark .form-group select,
 html.dark .complaint-table select,
-html.dark .complaint-table input {
+html.dark .complaint-table input,
+html.dark .modern-form-group input {
   background-color: #0F172A !important;
+  background: #0F172A !important;
   border: 1px solid #334155 !important;
   color: #F8FAFC !important;
 }
 
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus,
+html.dark .ant-input:focus,
+html.dark .ant-select-selector:focus,
 html.dark .form-group input:focus,
 html.dark .form-group textarea:focus,
 html.dark .form-group select:focus {
   border-color: #38bdf8 !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+  background-color: #0F172A !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder,
+html.dark .ant-input::placeholder {
+  color: #94A3B8 !important;
 }
 
 /* Tables */
-html.dark .complaint-table {
+html.dark table,
+html.dark .complaint-table,
+html.dark .dashboard-table,
+html.dark .admin-interactive-table {
   border: 1px solid #334155 !important;
   background-color: #1E293B !important;
 }
 
-html.dark .complaint-table th {
+html.dark th,
+html.dark .complaint-table th,
+html.dark .dashboard-table th,
+html.dark .admin-interactive-table th {
   background-color: #0F172A !important;
   color: #CBD5E1 !important;
   border-bottom: 2px solid #334155 !important;
 }
 
-html.dark .complaint-table td {
+html.dark td,
+html.dark .complaint-table td,
+html.dark .dashboard-table td,
+html.dark .admin-interactive-table td {
   border-bottom: 1px solid #334155 !important;
   color: #CBD5E1 !important;
+  background-color: #1E293B !important;
 }
 
-html.dark .complaint-table tr:hover td {
-  background-color: #1E293B !important;
+html.dark tr:hover td,
+html.dark .complaint-table tr:hover td,
+html.dark .dashboard-table tr:hover td,
+html.dark .admin-interactive-table tr:hover td,
+html.dark .admin-table-row:hover {
+  background-color: #111827 !important;
+}
+
+html.dark .table-row-hover:hover td {
+  background-color: #111827 !important;
 }
 
 /* Hero Section */
@@ -1403,7 +1464,31 @@ html.dark .about-paragraph {
   color: #CBD5E1 !important;
 }
 
-/* Ant Design Dropdown Override in Dark Mode */
+/* Ant Design Modals & Overrides */
+html.dark .ant-modal-content {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  color: #E2E8F0 !important;
+}
+
+html.dark .ant-modal-header {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+html.dark .ant-modal-title {
+  color: #F8FAFC !important;
+}
+
+html.dark .ant-modal-close {
+  color: #CBD5E1 !important;
+}
+
+html.dark .ant-modal-footer {
+  border-top: 1px solid #334155 !important;
+}
+
 html.dark .ant-dropdown-menu,
 html.dark .ant-select-dropdown {
   background-color: #1E293B !important;
@@ -1422,8 +1507,255 @@ html.dark .ant-select-item-option-active {
   color: #F8FAFC !important;
 }
 
-html.dark .ant-typography {
+/* Dashboard Lower Grid & Widgets */
+html.dark .quick-stats-strip .stat-pill {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-right: none !important;
+}
+
+html.dark .quick-stats-strip .pill-value {
   color: #F8FAFC !important;
+}
+
+html.dark .updates-timeline::before {
+  background-color: #334155 !important;
+}
+
+html.dark .updates-timeline .update-dot {
+  border-color: #1E293B !important;
+  box-shadow: 0 0 0 1px #334155 !important;
+}
+
+html.dark .update-content p {
+  color: #F8FAFC !important;
+}
+
+html.dark .dashboard-card-title span {
+  color: #94A3B8 !important;
+}
+
+html.dark .dashboard-grid-lower .dashboard-card div[style*="font-size: 1.75rem"] {
+  color: #F8FAFC !important;
+}
+
+/* Discussion / Conversation Section inside Expanded Table Row */
+html.dark .dashboard-table tr[style*="backgroundColor"] {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+}
+
+html.dark .dashboard-table tr[style*="backgroundColor"] td {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="background: '#fff'"],
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="background: rgb(255, 255, 255)"],
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="border: '1px solid"] {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="background: '#f1f5f9'"],
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="background: rgb(241, 245, 249)"] {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  color: #F8FAFC !important;
+}
+
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="background: '#dbeafe'"],
+html.dark .dashboard-table tr[style*="backgroundColor"] div[style*="background: rgb(219, 234, 254)"] {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #F8FAFC !important;
+}
+
+html.dark .dashboard-table tr[style*="backgroundColor"] strong,
+html.dark .dashboard-table tr[style*="backgroundColor"] span {
+  color: #F8FAFC !important;
+}
+
+/* Quick Links inside Dashboard */
+html.dark .dashboard-grid-lower a[style*="background: '#f8fafc'"],
+html.dark .dashboard-grid-lower a[style*="background: rgb(248, 250, 252)"] {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
+html.dark .dashboard-grid-lower a[style*="background: '#f8fafc'"]:hover {
+  background-color: #111827 !important;
+  background: #111827 !important;
+}
+
+/* Alert Boxes & Warnings in Dashboard */
+html.dark .dashboard-grid-lower div[style*="background: '#fff7ed'"] {
+  background-color: #1C1917 !important;
+  background: #1C1917 !important;
+  border-color: #78350F !important;
+}
+
+html.dark .dashboard-grid-lower div[style*="background: '#fee2e2'"] {
+  background-color: #7f1d1d !important;
+  background: #7f1d1d !important;
+}
+
+html.dark .dashboard-grid-lower div[style*="background: '#dbeafe'"] {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+}
+
+html.dark .dashboard-grid-lower div[style*="background: '#fef9c3'"] {
+  background-color: #713f12 !important;
+  background: #713f12 !important;
+}
+
+/* Profile Details Page Overrides */
+html.dark .profile-card-body > div,
+html.dark .profile-info-row {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+html.dark .profile-info-row span {
+  color: #CBD5E1 !important;
+}
+
+html.dark .profile-info-row span strong {
+  color: #F8FAFC !important;
+}
+
+html.dark .ant-divider {
+  background-color: #334155 !important;
+}
+
+html.dark .secondary-btn,
+html.dark button.secondary-btn,
+html.dark .profile-card-body button[style*="background: '#f0f2f5'"],
+html.dark .profile-card-body button[style*="background: rgb(240, 242, 245)"] {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark .secondary-btn:hover {
+  background-color: #111827 !important;
+  background: #111827 !important;
+}
+
+html.dark .profile-card-body button:last-child {
+  background-color: #7f1d1d !important;
+  background: #7f1d1d !important;
+  color: #F8FAFC !important;
+  border-color: #b91c1c !important;
+}
+
+/* File Upload dashed box */
+html.dark .form-group div[style*="dashed"] {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+html.dark .form-group div[style*="dashed"] p {
+  color: #CBD5E1 !important;
+}
+
+html.dark .form-group div[style*="dashed"] + div div {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+/* Error/Success banners inside forms */
+html.dark div[style*="backgroundColor: isSuccess"] {
+  background-color: #064e3b !important;
+  color: #a7f3d0 !important;
+  border-color: #047857 !important;
+}
+
+html.dark div[style*="backgroundColor: '#fee2e2'"] {
+  background-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+  border-color: #b91c1c !important;
+}
+
+/* Admin Dashboard Elements */
+html.dark .priority-alert-panel {
+  background: linear-gradient(135deg, #7f1d1d 0%, #1e293b 100%) !important;
+  border-left: 4px solid #ef4444 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .priority-alert-header {
+  color: #ef4444 !important;
+}
+
+html.dark .priority-alert-item {
+  color: #fca5a5 !important;
+}
+
+html.dark .admin-bulk-action-bar {
+  background-color: #1e3a8a !important;
+  border: 1px solid #3b82f6 !important;
+}
+
+html.dark .admin-bulk-action-bar span {
+  color: #e0e7ff !important;
+}
+
+html.dark .status-inline-popup {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+}
+
+html.dark .popup-btn-cancel {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  color: #CBD5E1 !important;
+}
+
+html.dark .admin-expanded-row {
+  background-color: #0F172A !important;
+}
+
+html.dark .admin-expanded-row td {
+  border-bottom: 2px solid #334155 !important;
+}
+
+html.dark .remark-bubble {
+  background: #0F172A !important;
+  border: 1px solid #334155 !important;
+  color: #E2E8F0 !important;
+}
+
+html.dark .mini-timeline::before {
+  background: #334155 !important;
+}
+
+html.dark .mt-item {
+  color: #CBD5E1 !important;
+}
+
+html.dark .admin-cell-title {
+  color: #F8FAFC !important;
+}
+
+/* Empty States descriptions */
+html.dark .ant-empty-description,
+html.dark .admin-empty-state p {
+  color: #94A3B8 !important;
 }
 
 /* Theme Toggle Button Styling */
